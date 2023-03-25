@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const Login = async newData => {
-  const {data} = await axios.post(`${process.env.API_URL}/api/user/login`, newData);
+  const {data} = await axios.post(`https://benetpharmacy-api.onrender.com/api/user/login`, newData);
   return data;
 };
 
