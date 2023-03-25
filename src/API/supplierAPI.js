@@ -1,7 +1,5 @@
 import axios from "axios";
 
-const URL = "http://127.0.0.1:5000";
-
 export const getSupplier = async token => {
   const config = {
     headers: {
@@ -9,7 +7,7 @@ export const getSupplier = async token => {
     },
   };
 
-  const {data} = await axios.get(`${URL}/api/supplier/`, config);
+  const {data} = await axios.get(`${process.env.API_URL}/api/supplier/`, config);
   return data;
 };
 
@@ -19,7 +17,11 @@ export const updateSupplier = async (id, updatedSupplier, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.put(`${URL}/api/supplier/${id}`, updatedSupplier, config);
+  const {data} = await axios.put(
+    `${process.env.API_URL}/api/supplier/${id}`,
+    updatedSupplier,
+    config
+  );
   return data;
 };
 
@@ -29,7 +31,7 @@ export const createSupplier = async (newSupplier, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.post(`${URL}/api/supplier/`, newSupplier, config);
+  const {data} = await axios.post(`${process.env.API_URL}/api/supplier/`, newSupplier, config);
   return data;
 };
 
@@ -39,6 +41,6 @@ export const deleteSupplier = async (id, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.delete(`${URL}/api/supplier/${id}`, config);
+  const {data} = await axios.delete(`${process.env.API_URL}/api/supplier/${id}`, config);
   return data;
 };

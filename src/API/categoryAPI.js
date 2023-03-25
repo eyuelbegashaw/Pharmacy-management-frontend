@@ -1,14 +1,12 @@
 import axios from "axios";
 
-const URL = "http://127.0.0.1:5000";
-
 export const getCategory = async token => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.get(`${URL}/api/category/`, config);
+  const {data} = await axios.get(`${process.env.API_URL}/api/category/`, config);
   return data;
 };
 
@@ -19,7 +17,7 @@ export const updateCategory = async (updatedCategory, token) => {
     },
   };
   const {data} = await axios.put(
-    `${URL}/api/category/${updatedCategory.id}`,
+    `${process.env.API_URL}/api/category/${updatedCategory.id}`,
     updatedCategory,
     config
   );
@@ -32,7 +30,7 @@ export const createCategory = async (newCategory, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.post(`${URL}/api/category/`, newCategory, config);
+  const {data} = await axios.post(`${process.env.API_URL}/api/category/`, newCategory, config);
   return data;
 };
 
@@ -42,6 +40,6 @@ export const deleteCategory = async (id, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.delete(`${URL}/api/category/${id}`, config);
+  const {data} = await axios.delete(`${process.env.API_URL}/api/category/${id}`, config);
   return data;
 };
