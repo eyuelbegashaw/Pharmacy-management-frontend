@@ -143,7 +143,7 @@ const Login = () => {
           className="d-flex justify-content-center text-primary fw-bold mx-5"
         >
           {!emailSent && (
-            <div style={{width: 400}}>
+            <div style={{width: 300}}>
               <div className="fs-2 fw-bold  my-2">
                 {forgotPassword && <div>FORGOT YOUR PASSWORD? </div>}
                 {valid && <div> NEW PASSWORD </div>}

@@ -93,7 +93,7 @@ const RangeStock = () => {
       <ToastContainer />
       <div className="w-100 theme text-white fs-4 text-center py-2">Stock Report</div>
       <div>
-        <div className="d-flex justify-content-around">
+        <div className="d-md-flex justify-content-around">
           <div>
             <label for="startDate">Date From</label> <br />
             <input

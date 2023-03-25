@@ -113,7 +113,7 @@ const DailyTransaction = () => {
       <div className="w-100 text-white fs-4 text-center py-2 theme">Transaction Report</div>
       <div>
         {user.isAdmin && (
-          <div className="d-flex justify-content-around">
+          <div className="d-md-flex justify-content-around">
             {selected === "daily" && (
               <div>
                 <label for="daily">Select date</label> <br />

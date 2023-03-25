@@ -30,7 +30,7 @@ const Receipt = ({transaction, setPrint}) => {
       <div id="divToPrint">
         <div className="d-flex py-4">
           <div className="mb-4">
-            <img src="logo.jpg" alt="Benet pharmacy logo" style={{width: 190}} />
+            <img src="benetLogo.jpg" alt="Benet pharmacy logo" style={{width: 190}} />
           </div>
           <div className="mt-2">
             <span className="fw-bold fs-1">BENET PHARMACY</span> <br />
