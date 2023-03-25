@@ -1,5 +1,6 @@
 import axios from "axios";
-import {URL} from "../util/url";
+
+const URL = "https://benetpharmacy-api.onrender.com";
 
 export const getNotification = async token => {
   const config = {
