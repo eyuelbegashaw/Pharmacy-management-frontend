@@ -1,4 +1,5 @@
 import axios from "axios";
+import {URL} from "../util/url";
 
 export const getTransaction = async token => {
   const config = {
@@ -6,7 +7,7 @@ export const getTransaction = async token => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.get(`${process.env.API_URL}/api/transaction/`, config);
+  const {data} = await axios.get(`${URL}/api/transaction/`, config);
   return data;
 };
 
@@ -16,11 +17,7 @@ export const getDailyTransaction = async (newTransaction, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.put(
-    `${process.env.API_URL}/api/transaction/daily`,
-    newTransaction,
-    config
-  );
+  const {data} = await axios.put(`${URL}/api/transaction/daily`, newTransaction, config);
   return data;
 };
 
@@ -30,11 +27,7 @@ export const createTransaction = async (newTransaction, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.post(
-    `${process.env.API_URL}/api/transaction/`,
-    newTransaction,
-    config
-  );
+  const {data} = await axios.post(`${URL}/api/transaction/`, newTransaction, config);
   return data;
 };
 
@@ -44,6 +37,6 @@ export const deleteTransaction = async (id, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.delete(`${process.env.API_URL}/api/transaction/${id}`, config);
+  const {data} = await axios.delete(`${URL}/api/transaction/${id}`, config);
   return data;
 };

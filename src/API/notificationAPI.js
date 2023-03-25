@@ -1,4 +1,5 @@
 import axios from "axios";
+import {URL} from "../util/url";
 
 export const getNotification = async token => {
   const config = {
@@ -6,7 +7,7 @@ export const getNotification = async token => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.get(`${process.env.API_URL}/api/notification/`, config);
+  const {data} = await axios.get(`${URL}/api/notification/`, config);
   return data;
 };
 
@@ -16,10 +17,7 @@ export const readNotification = async token => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.get(
-    `${process.env.API_URL}/api/notification/readNotification/`,
-    config
-  );
+  const {data} = await axios.get(`${URL}/api/notification/readNotification/`, config);
   return data;
 };
 
@@ -29,9 +27,6 @@ export const clearNotification = async token => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.get(
-    `${process.env.API_URL}/api/notification/clearNotification`,
-    config
-  );
+  const {data} = await axios.get(`${URL}/api/notification/clearNotification`, config);
   return data;
 };

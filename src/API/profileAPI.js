@@ -1,4 +1,5 @@
 import axios from "axios";
+import {URL} from "../util/url";
 
 export const getProfile = async token => {
   const config = {
@@ -6,7 +7,7 @@ export const getProfile = async token => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.get(`${process.env.API_URL}/api/user/profile/`, config);
+  const {data} = await axios.get(`${URL}/api/user/profile/`, config);
   return data;
 };
 
@@ -16,6 +17,6 @@ export const updateProfile = async (updatedProfile, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.put(`${process.env.API_URL}/api/user/profile`, updatedProfile, config);
+  const {data} = await axios.put(`${URL}/api/user/profile`, updatedProfile, config);
   return data;
 };
