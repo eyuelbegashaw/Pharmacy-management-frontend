@@ -1,0 +1,162 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+.container {
+  margin-top: 5px;
+  display: grid;
+  grid-gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  display: 100%;
+}
+
+nav a:hover {
+  color: rgb(255, 255, 255);
+}
+
+nav a {
+  text-decoration: none;
+  color: white;
+  font-size: 18px;
+}
+
+nav a.active {
+  color: rgb(185, 185, 15);
+  font-weight: bold;
+}
+.brand {
+  font-weight: bold;
+}
+
+.horizontalTable {
+  overflow-x: scroll;
+}
+
+.table-container {
+  height: 80vh;
+  overflow-y: scroll;
+  border-top: 1px solid black;
+}
+
+.select:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+body {
+  font-family: "Open Sans", sans-serif;
+}
+
+.select {
+  padding: 7px;
+  border: 1px solid #000000;
+  border-radius: 0px;
+  border-bottom: none;
+}
+
+.maximumWidth {
+  max-width: 500px;
+}
+
+.searchTerm {
+  border: 1px solid #000000;
+  border-bottom: none;
+  padding: 17px;
+  height: 20px;
+  outline: none;
+  color: #9dbfaf;
+}
+
+.searchTerm:focus {
+  color: #000000;
+}
+
+.selected-row {
+  background-color: rgb(138, 219, 138);
+  color: rgb(0, 0, 0);
+}
+
+.maxWidth {
+  min-width: 300px;
+}
+
+.minContent {
+  width: min-content;
+}
+
+.bottom {
+  background-color: rgb(138, 219, 138);
+}
+.receipt {
+  min-width: 500px;
+  display: none;
+}
+
+.theme {
+  background-color: #2d1768;
+  /*background-color: #301775;*/
+}
+
+.theme2 {
+  background-color: #301775;
+  /*background-color: #0d117a;*/
+}
+
+.notification-menu {
+  max-height: 500px;
+  overflow-y: scroll;
+  border: 1px solid rgb(54, 54, 160);
+}
+
+.bell {
+  color: yellow;
+}
+.A4 {
+  width: 100%;
+}
+
+.receiptInput {
+  border: none;
+  width: 80%;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .receipt {
+    display: block;
+  }
+
+  #divToPrint,
+  #divToPrint * {
+    visibility: visible;
+  }
+
+  #divToPrint {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  .table-container {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  hr {
+    display: none;
+  }
+
+  .myImage {
+    display: none;
+  }
+
+  .navbars {
+    height: auto;
+    width: 99%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    justify-content: center;
+    align-items: center;
+  }
+}
