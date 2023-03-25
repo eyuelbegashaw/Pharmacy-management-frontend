@@ -1,5 +1,6 @@
 import axios from "axios";
-import {URL} from "../util/url";
+//import {URL} from "../util/url";
+const URL = "https://benetpharmacy-api.onrender.com";
 
 export const Login = async newData => {
   const {data} = await axios.post(`${URL}/api/user/login`, newData);
