@@ -9,11 +9,13 @@ import * as drugAPI from "../API/drugAPI";
 import "react-toastify/dist/ReactToastify.css";
 import {ToastContainer, toast} from "react-toastify";
 import {errorMessage} from "../util/error";
+import {fixedTwoDigit} from "../util/twoDigit";
 
 const RangeStock = () => {
   const navigate = useNavigate();
   const {user} = useContext(userContext);
 
+  const [loading, setLoading] = useState(false);
   const [drugs, setDrugs] = useState([]);
   const [groupedDrugs, setGroupedDrugs] = useState([]);
 
@@ -29,9 +31,12 @@ const RangeStock = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await drugAPI.getDrug(user.token);
         setDrugs(response);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     };
@@ -153,14 +158,16 @@ const RangeStock = () => {
                   <td>{date}</td>
                   <td>{summary.GrossRemainingQuantity}</td>
                   <td>{summary.GrossPurchasedQuantity}</td>
-                  <td>{summary.GrossPurchasedPrice}</td>
+                  <td>{fixedTwoDigit(summary.GrossPurchasedPrice)}</td>
                 </tr>
               ))}
 
-              {groupedDrugs.length === 0 && (
+              {groupedDrugs.length === 0 && loading && (
                 <tr>
-                  <td colSpan="4" className="text-center m-2 fs-5 text-danger">
-                    No Data Available
+                  <td colSpan="4" className="text-center">
+                    <div class="spinner-border text-secondary my-2 me-2" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
                   </td>
                 </tr>
               )}

@@ -25,6 +25,7 @@ const Supplier = () => {
     phone_number: "",
   });
 
+  const [loading, setLoading] = useState(false);
   const [datas, setDatas] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [edit, setEdit] = useState(false);
@@ -38,9 +39,12 @@ const Supplier = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await supplierAPI.getSupplier(user.token);
         setDatas(response);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     };
@@ -134,7 +138,12 @@ const Supplier = () => {
       </div>
 
       <div className="2">
-        <SupplierTable datas={datas} handleDelete={handleDelete} handleEdit={handleEdit} />
+        <SupplierTable
+          datas={datas}
+          handleDelete={handleDelete}
+          handleEdit={handleEdit}
+          loading={loading}
+        />
       </div>
     </div>
   );

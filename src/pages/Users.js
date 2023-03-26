@@ -18,6 +18,7 @@ const Users = () => {
   const navigate = useNavigate();
 
   const {user} = useContext(userContext);
+  const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({
     isAdmin: "false",
     name: "",
@@ -41,9 +42,12 @@ const Users = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await userAPI.getUsers(user.token);
         setUsers(response);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     };
@@ -151,7 +155,12 @@ const Users = () => {
       </div>
 
       <div className="m-2">
-        <UserTable datas={users} handleDelete={handleDelete} handleEdit={handleEdit} />
+        <UserTable
+          datas={users}
+          handleDelete={handleDelete}
+          handleEdit={handleEdit}
+          loading={loading}
+        />
       </div>
     </div>
   );

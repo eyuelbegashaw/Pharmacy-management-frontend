@@ -13,6 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import {ToastContainer, toast} from "react-toastify";
 
 import {errorMessage} from "../util/error";
+import {fixedTwoDigit} from "../util/twoDigit";
 
 //APIs
 import * as drugAPI from "../API/drugAPI";
@@ -54,6 +55,8 @@ const Home = () => {
   const [transaction, setTransaction] = useState([]);
   const [notifications, setNotifications] = useState([]);
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     if (!user || user.status !== "active") {
       navigate("/login");
@@ -63,12 +66,15 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const categories = await categoryAPI.getCategory(user.token);
         const drugs = await drugAPI.getDrug(user.token);
         setDrugs(drugs);
         setFetchedDrugs(drugs);
         setCategories(categories);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     };
@@ -118,12 +124,6 @@ const Home = () => {
     setInputs({...inputs, [name]: Number(e.target.value)});
   };
 
-  const fixedTwoDigit = num => {
-    if (num !== "") {
-      return num.toFixed(2);
-    } else return "";
-  };
-
   const calculateProfit = () => {
     let profit = inputs.selling_price - inputs.purchased_price;
     let totalProfit = inputs.quantity * profit;
@@ -145,7 +145,7 @@ const Home = () => {
   };
 
   const handleSubmit = async () => {
-    if (inputs.selling_price <= 0 || inputs.quantity <= 0) {
+    if (inputs.selling_price <= 0 || inputs.quantity <= 0 || !Number.isInteger(inputs.quantity)) {
       toast.error("Please make sure all fields are filled in correctly");
     } else {
       const existingPurchase = transaction.find(p => p.drug_id === inputs._id);
@@ -200,11 +200,13 @@ const Home = () => {
     if (transaction.length !== 0) {
       try {
         if (transaction.length !== 0) {
+          setLoading(true);
           await transactionAPI.createTransaction(transaction, user.token);
           toast.success("Transaction added successfully");
           const drugs = await drugAPI.getDrug(user.token);
           setDrugs(drugs);
           setFetchedDrugs(drugs);
+          setLoading(false);
         }
       } catch (error) {
         toast.error(errorMessage(error));
@@ -266,7 +268,12 @@ const Home = () => {
                 </div>
 
                 <div>
-                  <HomeTable datas={drugs} handleEdit={handleEdit} selectedRow={selectedRow} />
+                  <HomeTable
+                    datas={drugs}
+                    handleEdit={handleEdit}
+                    selectedRow={selectedRow}
+                    loading={loading}
+                  />
                 </div>
               </div>
             </div>
@@ -321,6 +328,12 @@ const Home = () => {
                     </button>
                   </div>
                   <div className="d-flex">
+                    {transaction.length !== 0 && loading && (
+                      <div class="spinner-border text-secondary my-2 me-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                    )}
+
                     <div>
                       <button onClick={handleSell} className="btn theme text-white px-5 my-1">
                         Sell

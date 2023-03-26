@@ -15,6 +15,7 @@ import {errorMessage} from "../util/error";
 const Category = () => {
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
   const {user} = useContext(userContext);
   const [inputs, setInputs] = useState({id: "", name: ""});
   const [categories, setCategories] = useState([]);
@@ -30,9 +31,12 @@ const Category = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await categoryAPI.getCategory(user.token);
         setCategories(response);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     };
@@ -170,11 +174,12 @@ const Category = () => {
                   </td>
                 </tr>
               ))}
-
-              {categories.length === 0 && (
+              {categories.length === 0 && loading && (
                 <tr>
-                  <td colSpan="4" className="text-center m-2 fs-5 text-danger">
-                    No Data Available
+                  <td colSpan="4" className="text-center">
+                    <div class="spinner-border text-secondary my-2 me-2" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
                   </td>
                 </tr>
               )}

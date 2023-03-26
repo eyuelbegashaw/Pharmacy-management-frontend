@@ -11,11 +11,13 @@ import {useNavigate} from "react-router-dom";
 
 import {errorMessage} from "../util/error";
 import {ConvertDate} from "../util/date";
+import {fixedTwoDigit} from "../util/twoDigit";
 
 const RangeTransaction = () => {
   const navigate = useNavigate();
   const {user} = useContext(userContext);
 
+  const [loading, setLoading] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [groupedTransactions, setGroupedTransactions] = useState([]);
 
@@ -31,9 +33,12 @@ const RangeTransaction = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await transactionAPI.getTransaction(user.token);
         setTransactions(response);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     };
@@ -147,17 +152,19 @@ const RangeTransaction = () => {
               {groupedTransactions.map(([date, summary]) => (
                 <tr key={date}>
                   <td>{date}</td>
-                  <td>{summary.GrossBuyingPrice}</td>
+                  <td>{fixedTwoDigit(summary.GrossBuyingPrice)}</td>
                   <td>{summary.GrossQuantity}</td>
-                  <td>{summary.GrossSoldPrice}</td>
-                  <td>{summary.GrossProfit}</td>
+                  <td>{fixedTwoDigit(summary.GrossSoldPrice)}</td>
+                  <td>{fixedTwoDigit(summary.GrossProfit)}</td>
                 </tr>
               ))}
 
-              {groupedTransactions.length === 0 && (
+              {groupedTransactions.length === 0 && loading && (
                 <tr>
-                  <td colSpan="5" className="text-center m-2 fs-5 text-danger">
-                    No Data Available
+                  <td colSpan="5" className="text-center">
+                    <div class="spinner-border text-secondary my-2 me-2" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
                   </td>
                 </tr>
               )}

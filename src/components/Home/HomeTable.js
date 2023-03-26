@@ -1,4 +1,4 @@
-const HomeTable = ({datas, handleEdit, selectedRow}) => {
+const HomeTable = ({datas, handleEdit, selectedRow, loading}) => {
   return (
     <>
       <div className="horizontalTable table-container homeTable">
@@ -23,10 +23,13 @@ const HomeTable = ({datas, handleEdit, selectedRow}) => {
                   <td>{data.quantity} </td>
                 </tr>
               ))}
-            {datas.length === 0 && (
+
+            {datas.length === 0 && loading && (
               <tr>
-                <td colSpan="2" className="text-center m-2 fs-5 text-danger">
-                  No Data Available
+                <td colSpan="3" className="text-center">
+                  <div class="spinner-border text-secondary my-2 me-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
                 </td>
               </tr>
             )}

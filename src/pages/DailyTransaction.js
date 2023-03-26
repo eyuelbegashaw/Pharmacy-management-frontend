@@ -13,11 +13,13 @@ import {ToastContainer, toast} from "react-toastify";
 //Util
 import {errorMessage} from "../util/error";
 import {ConvertDate} from "../util/date";
+import {fixedTwoDigit} from "../util/twoDigit";
 
 const DailyTransaction = () => {
   const navigate = useNavigate();
   const {user} = useContext(userContext);
 
+  const [loading, setLoading] = useState(false);
   const [datas, setDatas] = useState([]);
   const [users, setUsers] = useState([]);
 
@@ -37,6 +39,7 @@ const DailyTransaction = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         if (!user.isAdmin) {
           const result = await transactionAPI.getDailyTransaction(
             {startDate: new Date(), saleBy: user._id},
@@ -49,7 +52,9 @@ const DailyTransaction = () => {
           setDatas(response);
           setUsers(result);
         }
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     };
@@ -233,11 +238,11 @@ const DailyTransaction = () => {
                         <span className="text-danger">DELETED</span>
                       )}
                     </td>
-                    {user.isAdmin && <td>{data.purchased_price}</td>}
+                    {user.isAdmin && <td>{fixedTwoDigit(data.purchased_price)}</td>}
                     <td>{data.quantity} </td>
-                    <td>{data.price} </td>
-                    <td>{data.total_price} </td>
-                    {user.isAdmin && <td>{data.profit} </td>}
+                    <td>{fixedTwoDigit(data.price)} </td>
+                    <td>{fixedTwoDigit(data.total_price)} </td>
+                    {user.isAdmin && <td>{fixedTwoDigit(data.profit)} </td>}
                     {user.isAdmin && (
                       <td>
                         <button className="border-0" onClick={() => handleDelete(data._id)}>
@@ -256,26 +261,33 @@ const DailyTransaction = () => {
                   {user.isAdmin && (
                     <th colSpan="2">
                       Gross Buying Price ={" "}
-                      {datas.reduce((acc, curr) => acc + curr.quantity * curr.purchased_price, 0)}
+                      {fixedTwoDigit(
+                        datas.reduce((acc, curr) => acc + curr.quantity * curr.purchased_price, 0)
+                      )}
                     </th>
                   )}
 
                   <th colSpan={user.isAdmin ? "2" : "8"}>
                     Gross Sold Price ={" "}
-                    {datas.reduce((acc, curr) => acc + curr.quantity * curr.price, 0)}
+                    {fixedTwoDigit(
+                      datas.reduce((acc, curr) => acc + curr.quantity * curr.price, 0)
+                    )}
                   </th>
                   {user.isAdmin && (
                     <th colSpan="4">
-                      Gross Profit = {datas.reduce((acc, curr) => acc + curr.profit, 0)}
+                      Gross Profit ={" "}
+                      {fixedTwoDigit(datas.reduce((acc, curr) => acc + curr.profit, 0))}
                     </th>
                   )}
                 </tr>
               )}
 
-              {datas.length === 0 && (
+              {datas.length === 0 && loading && (
                 <tr>
-                  <td colSpan="11" className="text-center m-2 fs-5 text-danger">
-                    No Data Available
+                  <td colSpan={user.isAdmin ? "11" : "8"} className="text-center">
+                    <div class="spinner-border text-secondary my-2 me-2" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
                   </td>
                 </tr>
               )}

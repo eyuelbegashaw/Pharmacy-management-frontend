@@ -44,6 +44,7 @@ const Drug = () => {
   const [category, setCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [loading, setLoading] = useState(false);
   const [selectedRow, setSelectedRow] = useState("");
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -61,14 +62,17 @@ const Drug = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const categories = await categoryAPI.getCategory(user.token);
         const suppliers = await supplierAPI.getSupplier(user.token);
-        const response = await drugAPI.getDrug(user.token);
+        const response = await drugAPI.getAllDrug(user.token);
         setDrugs(response);
         setFetcheDrugs(response);
         setCategories(categories);
         setSuppliers(suppliers);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     };
@@ -132,13 +136,17 @@ const Drug = () => {
       inputs.production_date === "" ||
       inputs.expiry_date === "" ||
       inputs.purchased_date === "" ||
+      inputs.quantity <= 0 ||
+      !Number.isInteger(Number(inputs.quantity)) ||
       inputs.purchased_quantity <= 0 ||
+      !Number.isInteger(Number(inputs.purchased_quantity)) ||
       inputs.type === "" ||
       inputs.location === "" ||
       inputs.category_id === "" ||
       inputs.supplier_id === "" ||
       inputs.measurement_size === "" ||
-      inputs.lowStock <= 0
+      inputs.lowStock <= 0 ||
+      !Number.isInteger(Number(inputs.lowStock))
     ) {
       return true;
     } else {
@@ -304,6 +312,7 @@ const Drug = () => {
             handleDelete={handleDelete}
             handleEdit={handleEdit}
             selectedRow={selectedRow}
+            loading={loading}
           />
         </div>
       </div>

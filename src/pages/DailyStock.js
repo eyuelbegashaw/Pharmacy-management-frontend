@@ -13,11 +13,13 @@ import {ToastContainer, toast} from "react-toastify";
 //Util
 import {errorMessage} from "../util/error";
 import {ConvertDate} from "../util/date";
+import {fixedTwoDigit} from "../util/twoDigit";
 
 const DailyStock = () => {
   const navigate = useNavigate();
   const {user} = useContext(userContext);
 
+  const [loading, setLoading] = useState(false);
   const [datas, setDatas] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
 
@@ -37,11 +39,14 @@ const DailyStock = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const result = await supplierAPI.getSupplier(user.token);
         const response = await drugAPI.getDrug(user.token);
         setDatas(response);
         setSuppliers(result);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     };
@@ -203,7 +208,7 @@ const DailyStock = () => {
                     </td>
                     <td>{data.quantity} </td>
                     <td>{data.purchased_quantity} </td>
-                    <td>{data.purchased_price} </td>
+                    <td>{fixedTwoDigit(data.purchased_price)} </td>
                   </tr>
                 ))}
               {datas.length !== 0 && (
@@ -218,18 +223,22 @@ const DailyStock = () => {
                   </th>
                   <th colSpan="3">
                     Gross Purchased Price ={" "}
-                    {datas.reduce(
-                      (acc, curr) => acc + curr.purchased_quantity * curr.purchased_price,
-                      0
+                    {fixedTwoDigit(
+                      datas.reduce(
+                        (acc, curr) => acc + curr.purchased_quantity * curr.purchased_price,
+                        0
+                      )
                     )}
                   </th>
                 </tr>
               )}
 
-              {datas.length === 0 && (
+              {datas.length === 0 && loading && (
                 <tr>
-                  <td colSpan="8" className="text-center m-2 fs-5 text-danger">
-                    No Data Available
+                  <td colSpan="8" className="text-center">
+                    <div class="spinner-border text-secondary my-2 me-2" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
                   </td>
                 </tr>
               )}

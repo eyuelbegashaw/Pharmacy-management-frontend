@@ -5,9 +5,6 @@ import {useState, useContext, useEffect} from "react";
 //APIS
 import * as authenicationAPI from "../API/authentication";
 
-//CSS htmlFor Login
-import "./css/Login.css";
-
 //Toast component
 import "react-toastify/dist/ReactToastify.css";
 import {ToastContainer, toast} from "react-toastify";
@@ -29,7 +26,7 @@ const Login = () => {
   const {email, password} = formData;
 
   const [emailSent, setEmailSent] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
 
@@ -135,10 +132,10 @@ const Login = () => {
       </div>
       <div className="d-md-flex fullHeight pt-3">
         <ToastContainer />
-        <div className="myImage">
-          <img src="Background2.jpg" alt="Benet pharmacy" className="img-fluid" />
+        <div className="myImage flex-grow-1">
+          <img src="/Background2.jpg" alt="Benet pharmacy" className="img-fluid" />
         </div>
-        <div className="d-flex justify-content-center text-primary fw-bold m-auto loginWidth">
+        <div className="mx-3 fw-bold ">
           {!emailSent && (
             <div className="loginWidth">
               <div className="fs-2 fw-bold  my-2">
@@ -188,10 +185,9 @@ const Login = () => {
                       New Password
                     </label>
                     <input
-                      type="email"
+                      type={showPassword ? "text" : "password"}
                       id="form2Example1"
                       className="form-control"
-                      name="email"
                       value={password1}
                       placeholder="Enter new password"
                       onChange={e => setPassword1(e.target.value)}
@@ -205,38 +201,43 @@ const Login = () => {
                       Confirm Password
                     </label>
                     <input
-                      type="email"
+                      type={showPassword ? "text" : "password"}
                       id="form2Example1"
                       className="form-control"
                       value={password2}
                       placeholder="Confirm new password"
                       onChange={e => setPassword2(e.target.value)}
                     />
+                    <input type="checkbox" onChange={() => setShowPassword(!showPassword)} /> {"  "}{" "}
+                    show Password
                   </div>
                 )}
 
                 {login && (
-                  <div className="form-outline mb-4">
-                    <label className="form-label" htmlFor="form2Example2">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      id="form2Example2"
-                      className="form-control"
-                      name="password"
-                      value={password}
-                      onChange={onChange}
-                      placeholder="Enter password"
-                    />
-                  </div>
+                  <>
+                    <div className="form-outline mb-4">
+                      <label className="form-label" htmlFor="form2Example2">
+                        Password
+                      </label>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        id="form2Example2"
+                        className="form-control"
+                        name="password"
+                        value={password}
+                        onChange={onChange}
+                        placeholder="Enter password"
+                      />
+                      <input type="checkbox" onChange={() => setShowPassword(!showPassword)} />{" "}
+                      {"  "} show Password
+                    </div>
+                  </>
                 )}
 
                 <div>
                   {login && (
                     <div>
                       <span
-                        className="forgotPassword"
                         onClick={() => {
                           setForgotPassword(true);
                           setLogin(false);
@@ -251,7 +252,6 @@ const Login = () => {
                   {forgotPassword && (
                     <div>
                       <span
-                        className="forgotPassword"
                         onClick={() => {
                           setForgotPassword(false);
                           setLogin(true);
@@ -266,7 +266,6 @@ const Login = () => {
                   {valid && (
                     <div>
                       <span
-                        className="forgotPassword"
                         onClick={() => {
                           setForgotPassword(false);
                           setLogin(true);
@@ -293,7 +292,7 @@ const Login = () => {
           )}
 
           {emailSent && (
-            <div className="p-2">
+            <div className="p-2 loginWidth">
               <h4>Confirm Email</h4>
               <p>
                 A password reset message was sent to your email address. Please clik the link in

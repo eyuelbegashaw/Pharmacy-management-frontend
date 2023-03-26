@@ -1,4 +1,4 @@
-const UserTable = ({datas, handleDelete, handleEdit}) => {
+const UserTable = ({datas, handleDelete, handleEdit, loading}) => {
   return (
     <>
       <div className="horizontalTable">
@@ -41,10 +41,12 @@ const UserTable = ({datas, handleDelete, handleEdit}) => {
               </tr>
             ))}
 
-            {datas.length === 0 && (
+            {datas.length === 0 && loading && (
               <tr>
-                <td colSpan="8" className="text-center m-2 fs-5 text-danger">
-                  No Data Available
+                <td colSpan="8" className="text-center">
+                  <div class="spinner-border text-secondary my-2 me-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
                 </td>
               </tr>
             )}

@@ -15,6 +15,7 @@ import {ConvertDate} from "../util/date";
 
 const FollowUp = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [select, handleSelect] = useState("expired");
   const [days, setDays] = useState(0);
   const [drugs, setDrugs] = useState([]);
@@ -22,8 +23,15 @@ const FollowUp = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const reponse = await drugAPI.getExpiredDrug(user.token);
-      setDrugs(reponse);
+      try {
+        setLoading(true);
+        const reponse = await drugAPI.getExpiredDrug(user.token);
+        setLoading(false);
+        setDrugs(reponse);
+      } catch (error) {
+        setLoading(false);
+        toast.error(errorMessage(error));
+      }
     };
     fetchData();
   }, [user.token]);
@@ -138,10 +146,12 @@ const FollowUp = () => {
               </tr>
             ))}
 
-            {drugs.length === 0 && (
+            {drugs.length === 0 && loading && (
               <tr>
-                <td colSpan="8" className="text-center m-2 fs-5 text-danger">
-                  No Data Available
+                <td colSpan="8" className="text-center">
+                  <div class="spinner-border text-secondary my-2 me-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
                 </td>
               </tr>
             )}

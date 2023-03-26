@@ -120,6 +120,7 @@ body {
 
 .loginWidth {
   width: 400px;
+  color: #2d1768;
 }
 
 .sideButton {
@@ -174,7 +175,9 @@ body {
 
   .loginWidth {
     width: 320px;
+    margin: auto;
   }
+
   .threeButtons {
     margin-top: 6px;
   }
