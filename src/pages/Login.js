@@ -138,12 +138,9 @@ const Login = () => {
         <div className="myImage">
           <img src="Background2.jpg" alt="Benet pharmacy" className="img-fluid" />
         </div>
-        <div
-          style={{maxWidth: "800px"}}
-          className="d-flex justify-content-center text-primary fw-bold mx-5"
-        >
+        <div className="d-flex justify-content-center text-primary fw-bold m-auto loginWidth">
           {!emailSent && (
-            <div style={{width: 300}}>
+            <div className="loginWidth">
               <div className="fs-2 fw-bold  my-2">
                 {forgotPassword && <div>FORGOT YOUR PASSWORD? </div>}
                 {valid && <div> NEW PASSWORD </div>}
@@ -283,8 +280,7 @@ const Login = () => {
 
                   <button
                     onClick={handleSubmit}
-                    className="button btn theme2 border text-white mt-4"
-                    style={{width: 400}}
+                    className="button btn theme2 border text-white mt-4 loginWidth"
                   >
                     {forgotPassword && "Reset Password"}
                     {login && "Login"}

@@ -1,11 +1,9 @@
 import {useState} from "react";
-//import {ToWords} from "to-words";
+import numberToWord from "../util/converter";
 
 import {ConvertDate} from "../util/date";
 
 const Receipt = ({transaction, setPrint}) => {
-  //const toWords = new ToWords();
-
   const [inputs, setInputs] = useState({
     idNumber: "",
     tinNumber: "",
@@ -193,7 +191,12 @@ const Receipt = ({transaction, setPrint}) => {
             </table>
 
             <div className="my-4 fs-4">
-              <p className="fs-4">Total amount in words : Birr only</p>
+              <p className="fs-4">
+                Total amount in words :{" "}
+                {numberToWord(
+                  fixedTwoDigit(transaction.reduce((acc, curr) => acc + curr.total_price, 0))
+                )}
+              </p>
 
               <p className="fs-4">
                 I received the above goods/services in good condition

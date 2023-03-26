@@ -17,7 +17,12 @@ const SupplierTable = ({datas, handleDelete, handleEdit}) => {
               <td>{data.name} </td>
               <td>{data.phone_number} </td>
               <td>
-                <a className="links" href={`${data.image}`} target="_blank">
+                <a
+                  className="links"
+                  href={`${data.image}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Licence
                 </a>
               </td>

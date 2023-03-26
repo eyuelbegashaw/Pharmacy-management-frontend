@@ -26,13 +26,13 @@ const FollowUp = () => {
       setDrugs(reponse);
     };
     fetchData();
-  }, []);
+  }, [user.token]);
 
   useEffect(() => {
     if (!user || user.status !== "active") {
       navigate("/login");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const handleShow = async () => {
     try {

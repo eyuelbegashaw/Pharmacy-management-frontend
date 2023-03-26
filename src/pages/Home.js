@@ -217,7 +217,6 @@ const Home = () => {
   const handleEdit = id => {
     setSelectedRow(id);
     let target = drugs.find(value => value._id === id);
-    console.log(target);
     let obj = {
       ...target,
       category_id: target.category_id ? target.category_id : "",

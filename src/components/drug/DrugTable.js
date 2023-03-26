@@ -75,7 +75,7 @@ const DrugTable = ({drugs, handleDelete, handleEdit, selectedRow}) => {
 
             {drugs.length === 0 && (
               <tr>
-                <td colSpan="17" className="text-center m-2 fs-5 text-danger">
+                <td colSpan="18" className="text-center m-2 fs-5 text-danger">
                   No Data Available
                 </td>
               </tr>

@@ -33,7 +33,7 @@ const Supplier = () => {
     if (!user || user.status !== "active" || user.isAdmin !== true) {
       navigate("/login");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,7 +45,7 @@ const Supplier = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [user.token]);
 
   const handleSubmit = async e => {
     e.preventDefault();

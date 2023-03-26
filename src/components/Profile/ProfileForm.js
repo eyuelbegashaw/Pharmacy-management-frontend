@@ -4,7 +4,7 @@ const ProfileForm = ({handleSubmit, handleChange, inputs}) => {
       <div className="d-sm-flex justify-content-around">
         <div className="d-flex flex-column">
           <div className="border maxWidth">
-            <label for="name">Name</label>
+            <label htmlFor="name">Name</label>
             <div className="col">
               <input
                 className="form-control"
@@ -19,7 +19,7 @@ const ProfileForm = ({handleSubmit, handleChange, inputs}) => {
           </div>
 
           <div>
-            <label for="phone_number">Phone number</label>
+            <label htmlFor="phone_number">Phone number</label>
             <input
               className="form-control"
               placeholder="phone number"
@@ -33,7 +33,7 @@ const ProfileForm = ({handleSubmit, handleChange, inputs}) => {
 
           <div>
             <div>
-              <label for="email">Email</label>
+              <label htmlFor="email">Email</label>
               <input
                 className="form-control"
                 placeholder="Email"
@@ -48,7 +48,7 @@ const ProfileForm = ({handleSubmit, handleChange, inputs}) => {
         </div>
         <div className="maxWidth">
           <div>
-            <label for="password">Password</label>
+            <label htmlFor="password">Password</label>
             <input
               className="form-control"
               placeholder="password"
@@ -61,7 +61,7 @@ const ProfileForm = ({handleSubmit, handleChange, inputs}) => {
           </div>
 
           <div>
-            <label for="gender">Gender</label>
+            <label htmlFor="gender">Gender</label>
             <select
               className="form-select"
               id="gender"

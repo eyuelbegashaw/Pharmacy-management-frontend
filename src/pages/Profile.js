@@ -36,13 +36,13 @@ const Profile = () => {
     };
 
     fetchData();
-  }, []);
+  }, [user.token]);
 
   useEffect(() => {
     if (!user || user.status !== "active") {
       navigate("/login");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const handleChange = e => {
     const name = e.target.name;

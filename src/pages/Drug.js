@@ -56,7 +56,7 @@ const Drug = () => {
     if (!user || user.status !== "active") {
       navigate("/login");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,11 +73,32 @@ const Drug = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [user.token]);
 
   useEffect(() => {
+    const handleSearch = () => {
+      let filteredData = fetchedDrugs;
+      if (searchTerm.trim() !== "") {
+        if (category !== "all") {
+          filteredData = filteredData.filter(
+            item =>
+              item.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+              (category === "" || item.category_id.name === category)
+          );
+        } else if (category === "all") {
+          filteredData = fetchedDrugs.filter(item => {
+            return item.brand_name.toLowerCase().includes(searchTerm.toLowerCase());
+          });
+        }
+      } else if (category !== "" && category !== "all") {
+        filteredData = filteredData.filter(
+          item => item.category_id && item.category_id.name === category
+        );
+      }
+      setDrugs(filteredData);
+    };
     handleSearch();
-  }, [searchTerm, category]);
+  }, [searchTerm, category, fetchedDrugs]);
 
   const cleanForm = () => {
     setInputs({
@@ -133,7 +154,7 @@ const Drug = () => {
       if (edit) {
         try {
           const updated = await drugAPI.updateDrug(inputs, user.token);
-          setDrugs(drugs.map(value => (value._id == updated._id ? updated : value)));
+          setDrugs(drugs.map(value => (value._id === updated._id ? updated : value)));
           toast.success("Drug Edited successfully");
           setSelectedRow("");
           cleanForm();
@@ -222,28 +243,6 @@ const Drug = () => {
       setSelectedRow("");
       cleanForm();
     }
-  };
-
-  const handleSearch = () => {
-    let filteredData = fetchedDrugs;
-    if (searchTerm.trim() !== "") {
-      if (category !== "all") {
-        filteredData = filteredData.filter(
-          item =>
-            item.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (category === "" || item.category_id.name === category)
-        );
-      } else if (category == "all") {
-        filteredData = fetchedDrugs.filter(item => {
-          return item.brand_name.toLowerCase().includes(searchTerm.toLowerCase());
-        });
-      }
-    } else if (category !== "" && category !== "all") {
-      filteredData = filteredData.filter(
-        item => item.category_id && item.category_id.name === category
-      );
-    }
-    setDrugs(filteredData);
   };
 
   return (

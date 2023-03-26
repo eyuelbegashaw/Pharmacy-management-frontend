@@ -10,12 +10,14 @@ import {ToastContainer, toast} from "react-toastify";
 import {useNavigate} from "react-router-dom";
 
 import {errorMessage} from "../util/error";
+import {ConvertDate} from "../util/date";
 
 const RangeTransaction = () => {
   const navigate = useNavigate();
   const {user} = useContext(userContext);
 
-  const [datas, setDatas] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [groupedTransactions, setGroupedTransactions] = useState([]);
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -24,37 +26,54 @@ const RangeTransaction = () => {
     if (!user || user.status !== "active" || user.isAdmin !== true) {
       navigate("/login");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await transactionAPI.getTransaction(user.token);
-        groupTransactionsByDate(response);
+        setTransactions(response);
       } catch (error) {
         toast.error(errorMessage(error));
       }
     };
     fetchData();
-  }, []);
+  }, [user.token]);
 
-  const ConvertDate = input => {
-    let x = Date.parse(input);
-    if (!isNaN(x)) {
-      let date = new Date(input);
-      let result = new Date(date.getTime()).toISOString().substring(0, 10);
-      return result;
-    } else if (input === "") return "";
-  };
+  useEffect(() => {
+    const groupTransactionsByDate = () => {
+      const dailySummaries = {};
+
+      transactions.forEach(transaction => {
+        const date = ConvertDate(transaction.date);
+        if (!dailySummaries[date]) {
+          dailySummaries[date] = {
+            GrossProfit: 0,
+            GrossQuantity: 0,
+            GrossSoldPrice: 0,
+            GrossBuyingPrice: 0,
+          };
+        }
+
+        dailySummaries[date].GrossProfit += transaction.profit;
+        dailySummaries[date].GrossQuantity += transaction.quantity;
+        dailySummaries[date].GrossSoldPrice += transaction.price * transaction.quantity;
+        dailySummaries[date].GrossBuyingPrice += transaction.purchased_price * transaction.quantity;
+      });
+
+      setGroupedTransactions(Object.entries(dailySummaries));
+    };
+
+    groupTransactionsByDate();
+  }, [transactions]);
 
   const handleSubmit = async () => {
     if (startDate === "" || endDate === "") {
       toast.error("Both dates are required");
     } else {
       try {
-        const result = await transactionAPI.getDailyTransaction({startDate, endDate}, user.token);
-        console.log(result);
-        groupTransactionsByDate(result);
+        const response = await transactionAPI.getDailyTransaction({startDate, endDate}, user.token);
+        setTransactions(response);
       } catch (error) {
         toast.error(errorMessage(error));
       }
@@ -63,32 +82,9 @@ const RangeTransaction = () => {
 
   const handleClear = async () => {
     const response = await transactionAPI.getTransaction(user.token);
-    groupTransactionsByDate(response);
+    setTransactions(response);
     setStartDate("");
     setEndDate("");
-  };
-
-  const groupTransactionsByDate = transactions => {
-    const dailySummaries = {};
-
-    transactions.forEach(transaction => {
-      const date = ConvertDate(transaction.date);
-      if (!dailySummaries[date]) {
-        dailySummaries[date] = {
-          GrossProfit: 0,
-          GrossQuantity: 0,
-          GrossSoldPrice: 0,
-          GrossBuyingPrice: 0,
-        };
-      }
-
-      dailySummaries[date].GrossProfit += transaction.profit;
-      dailySummaries[date].GrossQuantity += transaction.quantity;
-      dailySummaries[date].GrossSoldPrice += transaction.price * transaction.quantity;
-      dailySummaries[date].GrossBuyingPrice += transaction.purchased_price * transaction.quantity;
-    });
-
-    setDatas(dailySummaries);
   };
 
   return (
@@ -98,29 +94,29 @@ const RangeTransaction = () => {
       <div>
         <div className="d-md-flex justify-content-around">
           <div>
-            <label for="startDate">Date From</label> <br />
+            <label htmlFor="startDate">Date From</label> <br />
             <input
               type="date"
               id="startDate"
               name="startDate"
               value={startDate}
-              className="p-2 rounded border border-primary"
+              className="p-2 rounded border"
               onChange={e => setStartDate(e.target.value)}
             />
           </div>
 
           <div>
-            <label for="endDate">Date To</label> <br />
+            <label htmlFor="endDate">Date To</label> <br />
             <input
               type="date"
               id="endDate"
               name="endDate"
               value={endDate}
-              className="p-2 rounded border border-primary"
+              className="p-2 rounded border"
               onChange={e => setEndDate(e.target.value)}
             />
           </div>
-          <div className="d-flex align-self-end">
+          <div className="d-flex align-self-end threeButtons">
             <div className="me-2">
               <button className="btn theme text-white" onClick={handleSubmit}>
                 Show Sales
@@ -148,7 +144,7 @@ const RangeTransaction = () => {
               </tr>
             </thead>
             <tbody>
-              {Object.entries(datas).map(([date, summary]) => (
+              {groupedTransactions.map(([date, summary]) => (
                 <tr key={date}>
                   <td>{date}</td>
                   <td>{summary.GrossBuyingPrice}</td>
@@ -158,7 +154,7 @@ const RangeTransaction = () => {
                 </tr>
               ))}
 
-              {Object.entries(datas).length === 0 && (
+              {groupedTransactions.length === 0 && (
                 <tr>
                   <td colSpan="5" className="text-center m-2 fs-5 text-danger">
                     No Data Available

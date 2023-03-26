@@ -32,7 +32,7 @@ const DailyStock = () => {
     if (!user || user.status !== "active" || user.isAdmin !== true) {
       navigate("/login");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,7 +46,7 @@ const DailyStock = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [user.token]);
 
   const handleSubmit = async () => {
     try {
@@ -88,12 +88,12 @@ const DailyStock = () => {
         <div className="d-md-flex justify-content-around">
           {selected === "daily" && (
             <div>
-              <label for="daily">Select date</label> <br />
+              <label htmlFor="daily">Select date</label> <br />
               <div>
                 <input
                   type="date"
                   id="daily"
-                  className="p-2 rounded border border-primary"
+                  className="p-2 border rounded"
                   value={dailyDate}
                   onChange={e => setDailyDate(e.target.value)}
                 />
@@ -102,12 +102,12 @@ const DailyStock = () => {
           )}
           {selected === "range" && (
             <div>
-              <label for="startDate">Date From</label> <br />
+              <label htmlFor="startDate">Date From</label> <br />
               <input
                 type="date"
                 id="startDate"
                 name="startDate"
-                className="p-2 rounded border border-primary"
+                className="p-2 rounded border"
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
               />
@@ -116,12 +116,12 @@ const DailyStock = () => {
 
           {selected === "range" && (
             <div>
-              <label for="endDate">Date To</label> <br />
+              <label htmlFor="endDate">Date To</label> <br />
               <input
                 type="date"
                 id="endDate"
                 name="endDate"
-                className="p-2 rounded border border-primary"
+                className="p-2 rounded border"
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
               />
@@ -160,7 +160,7 @@ const DailyStock = () => {
             </select>
           </div>
 
-          <div className="d-flex">
+          <div className="d-flex threeButtons">
             <div className="align-self-end" onClick={handleSubmit}>
               <button className="btn theme text-white">Show Stock</button>
             </div>
@@ -209,14 +209,14 @@ const DailyStock = () => {
               {datas.length !== 0 && (
                 <tr className="bottom">
                   <th colSpan="1"></th>
-                  <th colspan="2">
+                  <th colSpan="2">
                     Gross Remaining Quantity = {datas.reduce((acc, curr) => acc + curr.quantity, 0)}
                   </th>
-                  <th colspan="2">
+                  <th colSpan="2">
                     Gross Purchased Quantity ={" "}
                     {datas.reduce((acc, curr) => acc + curr.purchased_quantity, 0)}
                   </th>
-                  <th colspan="3">
+                  <th colSpan="3">
                     Gross Purchased Price ={" "}
                     {datas.reduce(
                       (acc, curr) => acc + curr.purchased_quantity * curr.purchased_price,

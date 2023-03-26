@@ -36,7 +36,7 @@ const Users = () => {
     if (!user || user.status !== "active" || user.isAdmin !== true) {
       navigate("/login");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +48,7 @@ const Users = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [user.token]);
 
   const cleanForm = () => {
     setInputs({

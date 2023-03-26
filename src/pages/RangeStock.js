@@ -8,14 +8,14 @@ import * as drugAPI from "../API/drugAPI";
 //Toast component
 import "react-toastify/dist/ReactToastify.css";
 import {ToastContainer, toast} from "react-toastify";
-
 import {errorMessage} from "../util/error";
 
 const RangeStock = () => {
   const navigate = useNavigate();
   const {user} = useContext(userContext);
 
-  const [datas, setDatas] = useState([]);
+  const [drugs, setDrugs] = useState([]);
+  const [groupedDrugs, setGroupedDrugs] = useState([]);
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -24,19 +24,44 @@ const RangeStock = () => {
     if (!user || user.status !== "active" || user.isAdmin !== true) {
       navigate("/login");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await drugAPI.getDrug(user.token);
-        groupTransactionsByDate(response);
+        setDrugs(response);
       } catch (error) {
         toast.error(errorMessage(error));
       }
     };
     fetchData();
-  }, []);
+  }, [user.token, setDrugs]);
+
+  useEffect(() => {
+    const groupTransactionsByDate = () => {
+      const dailySummaries = {};
+
+      drugs.forEach(drug => {
+        const date = ConvertDate(drug.purchased_date);
+        if (!dailySummaries[date]) {
+          dailySummaries[date] = {
+            GrossRemainingQuantity: 0,
+            GrossPurchasedQuantity: 0,
+            GrossPurchasedPrice: 0,
+          };
+        }
+
+        dailySummaries[date].GrossRemainingQuantity += drug.quantity;
+        dailySummaries[date].GrossPurchasedQuantity += drug.purchased_quantity;
+        dailySummaries[date].GrossPurchasedPrice += drug.purchased_price * drug.purchased_quantity;
+      });
+
+      setGroupedDrugs(Object.entries(dailySummaries));
+    };
+
+    groupTransactionsByDate();
+  }, [drugs]);
 
   const ConvertDate = input => {
     let x = Date.parse(input);
@@ -52,8 +77,8 @@ const RangeStock = () => {
       toast.error("Empty fields");
     } else {
       try {
-        const result = await drugAPI.getDailyStock({startDate, endDate}, user.token);
-        groupTransactionsByDate(result);
+        const response = await drugAPI.getDailyStock({startDate, endDate}, user.token);
+        setDrugs(response);
       } catch (error) {
         toast.error(errorMessage(error));
       }
@@ -62,30 +87,9 @@ const RangeStock = () => {
 
   const handleClear = async () => {
     const response = await drugAPI.getDrug(user.token);
-    groupTransactionsByDate(response);
+    setDrugs(response);
     setStartDate("");
     setEndDate("");
-  };
-
-  const groupTransactionsByDate = drugs => {
-    const dailySummaries = {};
-
-    drugs.forEach(drug => {
-      const date = ConvertDate(drug.purchased_date);
-      if (!dailySummaries[date]) {
-        dailySummaries[date] = {
-          GrossRemainingQuantity: 0,
-          GrossPurchasedQuantity: 0,
-          GrossPurchasedPrice: 0,
-        };
-      }
-
-      dailySummaries[date].GrossRemainingQuantity += drug.quantity;
-      dailySummaries[date].GrossPurchasedQuantity += drug.purchased_quantity;
-      dailySummaries[date].GrossPurchasedPrice += drug.purchased_price * drug.purchased_quantity;
-    });
-
-    setDatas(dailySummaries);
   };
 
   return (
@@ -95,29 +99,29 @@ const RangeStock = () => {
       <div>
         <div className="d-md-flex justify-content-around">
           <div>
-            <label for="startDate">Date From</label> <br />
+            <label htmlFor="startDate">Date From</label> <br />
             <input
               type="date"
               id="startDate"
               name="startDate"
               value={startDate}
-              className="p-2 rounded border border-primary"
+              className="p-2 rounded border"
               onChange={e => setStartDate(e.target.value)}
             />
           </div>
 
           <div>
-            <label for="endDate">Date To</label> <br />
+            <label htmlFor="endDate">Date To</label> <br />
             <input
               type="date"
               id="endDate"
               name="endDate"
               value={endDate}
-              className="p-2 rounded border border-primary"
+              className="p-2 rounded border"
               onChange={e => setEndDate(e.target.value)}
             />
           </div>
-          <div className="d-flex align-self-end">
+          <div className="d-flex align-self-end threeButtons">
             <div className="me-2">
               <button className="btn theme text-white" onClick={handleSubmit}>
                 Show Stock
@@ -144,7 +148,7 @@ const RangeStock = () => {
               </tr>
             </thead>
             <tbody>
-              {Object.entries(datas).map(([date, summary]) => (
+              {groupedDrugs.map(([date, summary]) => (
                 <tr key={date}>
                   <td>{date}</td>
                   <td>{summary.GrossRemainingQuantity}</td>
@@ -153,7 +157,7 @@ const RangeStock = () => {
                 </tr>
               ))}
 
-              {Object.entries(datas).length === 0 && (
+              {groupedDrugs.length === 0 && (
                 <tr>
                   <td colSpan="4" className="text-center m-2 fs-5 text-danger">
                     No Data Available
