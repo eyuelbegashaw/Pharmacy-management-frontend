@@ -55,6 +55,7 @@ const DailyStock = () => {
 
   const handleSubmit = async () => {
     try {
+      setLoading(true);
       if (selected === "daily") {
         const result = await drugAPI.getDailyStock({startDate: dailyDate, supplier}, user.token);
         setDatas(result);
@@ -66,13 +67,16 @@ const DailyStock = () => {
           setDatas(result);
         }
       }
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       toast.error(errorMessage(error));
     }
   };
 
   const handleClear = async () => {
     try {
+      setLoading(true);
       const response = await drugAPI.getDrug(user.token);
       setDatas(response);
       setSelected("daily");
@@ -80,7 +84,9 @@ const DailyStock = () => {
       setStartDate("");
       setEndDate("");
       setSupplier("");
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       toast.error(errorMessage(error));
     }
   };
@@ -90,7 +96,7 @@ const DailyStock = () => {
       <ToastContainer />
       <div className="w-100 text-white fs-4 text-center py-2 theme">Stock Report</div>
       <div>
-        <div className="d-md-flex justify-content-around">
+        <div className="d-md-flex justify-content-around ms-2">
           {selected === "daily" && (
             <div>
               <label htmlFor="daily">Select date</label> <br />
@@ -165,7 +171,7 @@ const DailyStock = () => {
             </select>
           </div>
 
-          <div className="d-flex threeButtons">
+          <div className="d-flex threeButtons" style={{width: 150}}>
             <div className="align-self-end" onClick={handleSubmit}>
               <button className="btn theme text-white">Show Stock</button>
             </div>
@@ -175,6 +181,11 @@ const DailyStock = () => {
             <div className="ms-4 align-self-end" onClick={() => window.print()}>
               <button className="btn theme text-white">Print</button>
             </div>
+            {datas.length > 0 && loading && (
+              <div className="spinner-border text-secondary mb-1 ms-1" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            )}
           </div>
         </div>
         <div className="horizontalTable table-container mt-1 w-100" id="divToPrint">
@@ -236,8 +247,8 @@ const DailyStock = () => {
               {datas.length === 0 && loading && (
                 <tr>
                   <td colSpan="8" className="text-center">
-                    <div class="spinner-border text-secondary my-2 me-2" role="status">
-                      <span class="visually-hidden">Loading...</span>
+                    <div className="spinner-border text-secondary my-2 me-2" role="status">
+                      <span className="visually-hidden">Loading...</span>
                     </div>
                   </td>
                 </tr>

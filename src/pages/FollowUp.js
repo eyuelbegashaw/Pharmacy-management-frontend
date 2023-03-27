@@ -44,17 +44,25 @@ const FollowUp = () => {
 
   const handleShow = async () => {
     try {
-      if (select === "expired") {
-        const expired = await drugAPI.getExpiredDrug(user.token);
-        setDrugs(expired);
-      } else if (select === "expiringSoon") {
-        const expiringSoon = await drugAPI.getExpiringSoonDrugs({days}, user.token);
-        setDrugs(expiringSoon);
-      } else if (select === "outOfStock") {
-        const lowStockDrugs = await drugAPI.getLowStockDrug({quantity: days}, user.token);
-        setDrugs(lowStockDrugs);
+      if (Number(days) < 0 || !Number.isInteger(Number(days))) {
+        toast.error("Please make sure all fields are filled in correctly");
+      } else {
+        setLoading(true);
+        if (select === "expired") {
+          const expired = await drugAPI.getExpiredDrug(user.token);
+          setDrugs(expired);
+        } else if (select === "expiringSoon") {
+          const expiringSoon = await drugAPI.getExpiringSoonDrugs({days}, user.token);
+          setDrugs(expiringSoon);
+        } else if (select === "outOfStock") {
+          const lowStockDrugs = await drugAPI.getLowStockDrug({quantity: days}, user.token);
+          setDrugs(lowStockDrugs);
+        }
       }
+
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       toast.error(errorMessage(error));
     }
   };
@@ -66,7 +74,7 @@ const FollowUp = () => {
       </div>
       <ToastContainer />
 
-      <div className="d-sm-flex justify-content-around  align-items-center ms-1">
+      <div className="d-sm-flex justify-content-around align-items-center ms-2">
         <div className="mb-3">
           <label htmlFor="expiredItems"></label>
 
@@ -89,7 +97,7 @@ const FollowUp = () => {
           </select>
         </div>
 
-        <div className="ms-2 mt-2 d-md-flex ">
+        <div className="mt-2 d-md-flex ">
           <div className="mt-sm-1">
             {select === "outOfStock" ? (
               <label htmlFor="expiringDays">Maximum Quantity : </label>
@@ -109,10 +117,17 @@ const FollowUp = () => {
               onChange={e => setDays(e.target.value)}
             />
           </div>
-          <div>
-            <button className="btn theme text-white align-self-end" onClick={handleShow}>
-              Show
-            </button>
+          <div className="d-flex" style={{width: 120}}>
+            <div>
+              <button className="btn theme text-white align-self-end" onClick={handleShow}>
+                Show
+              </button>
+            </div>
+            {drugs.length > 0 && loading && (
+              <div className="spinner-border text-secondary ms-2" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -149,8 +164,8 @@ const FollowUp = () => {
             {drugs.length === 0 && loading && (
               <tr>
                 <td colSpan="8" className="text-center">
-                  <div class="spinner-border text-secondary my-2 me-2" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                  <div className="spinner-border text-secondary my-2 me-2" role="status">
+                    <span className="visually-hidden">Loading...</span>
                   </div>
                 </td>
               </tr>

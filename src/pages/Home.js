@@ -329,8 +329,8 @@ const Home = () => {
                   </div>
                   <div className="d-flex">
                     {transaction.length !== 0 && loading && (
-                      <div class="spinner-border text-secondary my-2 me-2" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                      <div className="spinner-border text-secondary my-2 me-2" role="status">
+                        <span className="visually-hidden">Loading...</span>
                       </div>
                     )}
 

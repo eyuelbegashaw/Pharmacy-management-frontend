@@ -159,20 +159,16 @@ const Drug = () => {
     if (empty) {
       toast.error("Please make sure all fields are filled in correctly");
     } else {
-      if (edit) {
-        try {
+      try {
+        setLoading(true);
+        if (edit) {
           const updated = await drugAPI.updateDrug(inputs, user.token);
           setDrugs(drugs.map(value => (value._id === updated._id ? updated : value)));
           toast.success("Drug Edited successfully");
           setSelectedRow("");
           cleanForm();
-        } catch (error) {
-          toast.error(errorMessage(error));
-        }
-
-        setEdit(false);
-      } else {
-        try {
+          setEdit(false);
+        } else {
           if (inputs.quantity !== inputs.purchased_quantity) {
             toast.error("Quantity in Stock and Purchased quantity must be equal");
           } else {
@@ -181,9 +177,11 @@ const Drug = () => {
             toast.success("New Drug added successfully");
             cleanForm();
           }
-        } catch (error) {
-          toast.error(errorMessage(error));
         }
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        toast.error(errorMessage(error));
       }
     }
   };
@@ -196,14 +194,17 @@ const Drug = () => {
       } else if (Number(inputs.quantity) !== Number(inputs.purchased_quantity)) {
         toast.error("Quantity In Stock and Purchased Quantity Must Be Equal");
       } else {
+        setLoading(true);
         let newDrug = {...inputs};
         delete newDrug._id;
         const newData = await drugAPI.createDrug(newDrug, user.token);
         setDrugs([...drugs, newData]);
         toast.success("New Drug added successfully");
         cleanForm();
+        setLoading(false);
       }
     } catch (error) {
+      setLoading(false);
       toast.error(errorMessage(error));
     }
   };
@@ -259,11 +260,14 @@ const Drug = () => {
         <ToastContainer />
         <div className="text-white fs-4 text-center py-2 mb-2  theme">Drug Management</div>
         <div>
-          <div>
-            <button onClick={handleAddClick} className="btn theme text-white mb-2 ms-1">
-              {showAdd ? "Hide" : "Add"}
-            </button>
+          <div className="d-flex">
+            <div>
+              <button onClick={handleAddClick} className="btn theme text-white mb-2 ms-1">
+                {showAdd ? "Hide" : "Add"}
+              </button>
+            </div>
           </div>
+
           {showAdd && (
             <DrugForm
               handleSubmit={handleSubmit}
@@ -275,6 +279,8 @@ const Drug = () => {
               inputs={inputs}
               edit={edit}
               user={user}
+              drugs={drugs}
+              loading={loading}
             />
           )}
         </div>

@@ -1,4 +1,4 @@
-const UserForm = ({handleSubmit, handleChange, inputs, edit}) => {
+const UserForm = ({handleSubmit, handleChange, inputs, edit, users, loading}) => {
   return (
     <form onSubmit={e => handleSubmit(e)}>
       <div className="container">
@@ -98,11 +98,20 @@ const UserForm = ({handleSubmit, handleChange, inputs, edit}) => {
           </select>
         </div>
       </div>
-      <input
-        type="submit"
-        value={edit === true ? "Edit" : "Add"}
-        className="btn mt-3 theme text-white"
-      />
+      <div className="d-flex mt-2">
+        <div>
+          <input
+            type="submit"
+            value={edit === true ? "Edit" : "Add"}
+            className="btn theme text-white"
+          />
+        </div>
+        {users.length > 0 && loading && (
+          <div className="spinner-border text-secondary mt-1 ms-2" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        )}
+      </div>
     </form>
   );
 };

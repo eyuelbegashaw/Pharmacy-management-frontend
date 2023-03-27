@@ -63,6 +63,7 @@ const DailyTransaction = () => {
 
   const handleSubmit = async () => {
     try {
+      setLoading(true);
       if (selected === "daily") {
         const result = await transactionAPI.getDailyTransaction(
           {startDate: dailyDate, saleBy},
@@ -80,13 +81,16 @@ const DailyTransaction = () => {
           setDatas(result);
         }
       }
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       toast.error(errorMessage(error));
     }
   };
 
   const handleClear = async () => {
     try {
+      setLoading(true);
       const response = await transactionAPI.getTransaction(user.token);
       setDatas(response);
       setSelected("daily");
@@ -94,7 +98,9 @@ const DailyTransaction = () => {
       setStartDate("");
       setEndDate("");
       setSaleBy("");
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       toast.error(errorMessage(error));
     }
   };
@@ -117,7 +123,7 @@ const DailyTransaction = () => {
       <div className="w-100 text-white fs-4 text-center py-2 theme">Transaction Report</div>
       <div>
         {user.isAdmin && (
-          <div className="d-md-flex justify-content-around">
+          <div className="d-md-flex justify-content-around ms-2">
             {selected === "daily" && (
               <div>
                 <label htmlFor="daily">Select date</label> <br />
@@ -192,16 +198,21 @@ const DailyTransaction = () => {
               </select>
             </div>
 
-            <div className="d-flex threeButtons">
-              <div className="align-self-end" onClick={handleSubmit}>
+            <div className="d-flex align-items-end threeButtons" style={{width: 330}}>
+              <div onClick={handleSubmit}>
                 <button className="btn theme text-white">Show Sales</button>
               </div>
-              <div className="align-self-end" onClick={handleClear}>
+              <div onClick={handleClear}>
                 <button className="ms-2 btn btn-danger">Clear</button>
               </div>
-              <div className="ms-4 align-self-end" onClick={() => window.print()}>
+              <div className="ms-4" onClick={() => window.print()}>
                 <button className="btn theme text-white">Print</button>
               </div>
+              {datas.length > 0 && loading && (
+                <div className="spinner-border text-secondary mb-1 ms-1" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -285,8 +296,8 @@ const DailyTransaction = () => {
               {datas.length === 0 && loading && (
                 <tr>
                   <td colSpan={user.isAdmin ? "11" : "8"} className="text-center">
-                    <div class="spinner-border text-secondary my-2 me-2" role="status">
-                      <span class="visually-hidden">Loading...</span>
+                    <div className="spinner-border text-secondary my-2 me-2" role="status">
+                      <span className="visually-hidden">Loading...</span>
                     </div>
                   </td>
                 </tr>

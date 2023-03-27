@@ -82,19 +82,29 @@ const RangeStock = () => {
       toast.error("Empty fields");
     } else {
       try {
+        setLoading(true);
         const response = await drugAPI.getDailyStock({startDate, endDate}, user.token);
         setDrugs(response);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     }
   };
 
   const handleClear = async () => {
-    const response = await drugAPI.getDrug(user.token);
-    setDrugs(response);
-    setStartDate("");
-    setEndDate("");
+    try {
+      setLoading(true);
+      const response = await drugAPI.getDrug(user.token);
+      setDrugs(response);
+      setStartDate("");
+      setEndDate("");
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      toast.error(errorMessage(error));
+    }
   };
 
   return (
@@ -102,7 +112,7 @@ const RangeStock = () => {
       <ToastContainer />
       <div className="w-100 theme text-white fs-4 text-center py-2">Stock Report</div>
       <div>
-        <div className="d-md-flex justify-content-around">
+        <div className="d-md-flex justify-content-around ms-2">
           <div>
             <label htmlFor="startDate">Date From</label> <br />
             <input
@@ -126,7 +136,7 @@ const RangeStock = () => {
               onChange={e => setEndDate(e.target.value)}
             />
           </div>
-          <div className="d-flex align-self-end threeButtons">
+          <div className="d-flex align-self-end threeButtons" style={{width: 330}}>
             <div className="me-2">
               <button className="btn theme text-white" onClick={handleSubmit}>
                 Show Stock
@@ -140,6 +150,11 @@ const RangeStock = () => {
             <div className="ms-4 align-self-end" onClick={() => window.print()}>
               <button className="btn theme text-white">Print</button>
             </div>
+            {groupedDrugs.length > 0 && loading && (
+              <div className="spinner-border text-secondary mb-1 ms-1" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            )}
           </div>
         </div>
         <div className="horizontalTable table-container mt-1 w-100" id="divToPrint">
@@ -165,8 +180,8 @@ const RangeStock = () => {
               {groupedDrugs.length === 0 && loading && (
                 <tr>
                   <td colSpan="4" className="text-center">
-                    <div class="spinner-border text-secondary my-2 me-2" role="status">
-                      <span class="visually-hidden">Loading...</span>
+                    <div className="spinner-border text-secondary my-2 me-2" role="status">
+                      <span className="visually-hidden">Loading...</span>
                     </div>
                   </td>
                 </tr>

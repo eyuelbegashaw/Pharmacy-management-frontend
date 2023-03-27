@@ -43,8 +43,8 @@ const SupplierTable = ({datas, handleDelete, handleEdit, loading}) => {
           {datas.length === 0 && loading && (
             <tr>
               <td colSpan="5" className="text-center">
-                <div class="spinner-border text-secondary my-2 me-2" role="status">
-                  <span class="visually-hidden">Loading...</span>
+                <div className="spinner-border text-secondary my-2 me-2" role="status">
+                  <span className="visually-hidden">Loading...</span>
                 </div>
               </td>
             </tr>

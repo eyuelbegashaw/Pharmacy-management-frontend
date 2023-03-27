@@ -25,6 +25,7 @@ const Login = () => {
   });
   const {email, password} = formData;
 
+  const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [password1, setPassword1] = useState("");
@@ -77,9 +78,12 @@ const Login = () => {
       toast.error("Empty Fields");
     } else {
       try {
+        setLoading(true);
         await authenicationAPI.forgotPassword({email: emailRequest});
         setEmailSent(true);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     }
@@ -90,6 +94,7 @@ const Login = () => {
       toast.error("Empty Fields");
     } else {
       try {
+        setLoading(true);
         const response = await authenicationAPI.Login(formData);
         if (response) {
           localStorage.setItem("user", JSON.stringify(response));
@@ -98,7 +103,9 @@ const Login = () => {
         } else {
           toast.error("invalid credentials");
         }
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error("invalid credentials");
       }
     }
@@ -111,6 +118,7 @@ const Login = () => {
       toast.error("Passwords do not match");
     } else {
       try {
+        setLoading(true);
         const response = await authenicationAPI.resetPassword({
           resetLink,
           newPassword: password1,
@@ -119,7 +127,9 @@ const Login = () => {
         if (response) {
           toast.success("password updated successfully");
         }
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     }
@@ -138,10 +148,15 @@ const Login = () => {
         <div className="mx-3 fw-bold ">
           {!emailSent && (
             <div className="loginWidth">
-              <div className="fs-2 fw-bold  my-2">
+              <div className="d-flex fs-2 fw-bold my-2">
                 {forgotPassword && <div>FORGOT YOUR PASSWORD? </div>}
                 {valid && <div> NEW PASSWORD </div>}
                 {login && <div>SIGN IN</div>}
+                {loading && (
+                  <div className="spinner-border text-secondary mt-2 ms-2 fs-5" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -279,12 +294,13 @@ const Login = () => {
 
                   <button
                     onClick={handleSubmit}
-                    className="button btn theme2 border text-white mt-4 loginWidth"
+                    className="button btn theme2 border mt-3 text-white loginWidth"
                   >
                     {forgotPassword && "Reset Password"}
                     {login && "Login"}
                     {valid && "Change Password"}
                   </button>
+
                   <br />
                 </div>
               </div>

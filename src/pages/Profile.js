@@ -17,6 +17,7 @@ import {errorMessage} from "../util/error";
 const Profile = () => {
   const navigate = useNavigate();
   const {user} = useContext(userContext);
+  const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({
     name: "",
     gender: "",
@@ -56,10 +57,13 @@ const Profile = () => {
       toast.error("Please make sure all fields are filled in correctly");
     } else {
       try {
+        setLoading(true);
         const updated = await profileAPI.updateProfile(inputs, user.token);
         setInputs(updated);
         toast.success("Edited successfully");
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     }
@@ -69,7 +73,12 @@ const Profile = () => {
     <div className="container-fluid mt-1">
       <ToastContainer />
       <div>
-        <ProfileForm handleSubmit={handleSubmit} handleChange={handleChange} inputs={inputs} />
+        <ProfileForm
+          handleSubmit={handleSubmit}
+          handleChange={handleChange}
+          inputs={inputs}
+          loading={loading}
+        />
       </div>
     </div>
   );

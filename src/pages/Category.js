@@ -65,6 +65,7 @@ const Category = () => {
     if (inputs.name === "") {
       toast.error("Please make sure all fields are filled in correctly");
     } else {
+      setLoading(true);
       try {
         if (edit) {
           const updated = await categoryAPI.updateCategory(inputs, user.token);
@@ -75,7 +76,9 @@ const Category = () => {
           setCategories([...categories, newData]);
           toast.success("New data added successfully");
         }
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     }
@@ -138,10 +141,18 @@ const Category = () => {
                   onChange={e => handleChange(e)}
                   style={{width: 350}}
                 />
-                <div className="">
-                  <button type="submit" className="btn theme text-white my-2">
-                    {edit ? "Update" : "Create"}
-                  </button>
+                <div className="d-flex mt-2">
+                  <div>
+                    <button type="submit" className="btn theme text-white">
+                      {edit ? "Update" : "Create"}
+                    </button>
+                  </div>
+
+                  {categories.length > 0 && loading && (
+                    <div className="spinner-border text-secondary mt-1 ms-2" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </form>
@@ -177,8 +188,8 @@ const Category = () => {
               {categories.length === 0 && loading && (
                 <tr>
                   <td colSpan="4" className="text-center">
-                    <div class="spinner-border text-secondary my-2 me-2" role="status">
-                      <span class="visually-hidden">Loading...</span>
+                    <div className="spinner-border text-secondary my-2 me-2" role="status">
+                      <span className="visually-hidden">Loading...</span>
                     </div>
                   </td>
                 </tr>

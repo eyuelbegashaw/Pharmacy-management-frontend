@@ -78,26 +78,24 @@ const Users = () => {
     ) {
       toast.error("Please make sure all fields are filled in correctly");
     } else {
-      if (edit) {
-        try {
+      try {
+        setLoading(true);
+        if (edit) {
           const updated = await userAPI.updateUser(inputs, user.token);
           setUsers(users.map(value => (value._id === updated._id ? updated : value)));
           toast.success("Edited successfully");
           cleanForm();
-        } catch (error) {
-          toast.error(error.response.data.message);
-        }
-
-        setEdit(false);
-      } else {
-        try {
+          setEdit(false);
+        } else {
           const newUser = await userAPI.registerUser(inputs, user.token);
           setUsers([...users, newUser]);
           toast.success("Registerd successfully");
           cleanForm();
-        } catch (error) {
-          toast.error(errorMessage(error));
         }
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        toast.error(errorMessage(error));
       }
     }
   };
@@ -150,6 +148,8 @@ const Users = () => {
             handleChange={handleChange}
             inputs={inputs}
             edit={edit}
+            users={users}
+            loading={loading}
           />
         )}
       </div>

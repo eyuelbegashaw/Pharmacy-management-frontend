@@ -1,9 +1,9 @@
-const ProfileForm = ({handleSubmit, handleChange, inputs}) => {
+const ProfileForm = ({handleSubmit, handleChange, inputs, loading}) => {
   return (
     <form onSubmit={e => handleSubmit(e)}>
       <div className="d-sm-flex justify-content-around">
         <div className="d-flex flex-column">
-          <div className="border maxWidth">
+          <div className="maxWidth">
             <label htmlFor="name">Name</label>
             <div className="col">
               <input
@@ -76,12 +76,19 @@ const ProfileForm = ({handleSubmit, handleChange, inputs}) => {
         </div>
       </div>
       <div className="d-flex justify-content-center mt-2">
-        <input
-          type="submit"
-          value="Update"
-          className="mt-3 btn theme text-white"
-          style={{width: 200}}
-        />
+        <div>
+          <input
+            type="submit"
+            value="Update"
+            className="btn theme text-white"
+            style={{width: 200}}
+          />
+        </div>
+        {loading && (
+          <div className="spinner-border text-secondary  ms-2" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        )}
       </div>
     </form>
   );

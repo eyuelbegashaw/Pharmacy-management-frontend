@@ -61,6 +61,7 @@ const Supplier = () => {
       toast.error("Please make sure all fields are filled in correctly");
     } else {
       try {
+        setLoading(true);
         if (edit) {
           const updated = await supplierAPI.updateSupplier(inputs._id, formData, user.token);
           setDatas(datas.map(value => (value._id === inputs._id ? updated : value)));
@@ -70,7 +71,9 @@ const Supplier = () => {
           setDatas([...datas, newData]);
           toast.success("New data added successfully");
         }
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         toast.error(errorMessage(error));
       }
     }
@@ -133,6 +136,8 @@ const Supplier = () => {
             handleChange={handleChange}
             inputs={inputs}
             edit={edit}
+            suppliers={datas}
+            loading={loading}
           />
         )}
       </div>

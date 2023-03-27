@@ -1,4 +1,4 @@
-const SupplierForm = ({handleSubmit, handleChange, inputs, edit}) => {
+const SupplierForm = ({handleSubmit, handleChange, inputs, edit, suppliers, loading}) => {
   return (
     <form onSubmit={e => handleSubmit(e)}>
       <div style={{width: 500}}>
@@ -43,12 +43,20 @@ const SupplierForm = ({handleSubmit, handleChange, inputs, edit}) => {
           </div>
         </div>
       </div>
-
-      <input
-        type="submit"
-        value={edit === true ? "Edit" : "Add"}
-        className="mt-3 btn theme text-white"
-      />
+      <div className="d-flex">
+        <div>
+          <input
+            type="submit"
+            value={edit === true ? "Edit" : "Add"}
+            className="btn theme text-white"
+          />
+        </div>
+        {suppliers.length > 0 && loading && (
+          <div className="spinner-border text-secondary mt-1 ms-2" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        )}
+      </div>
     </form>
   );
 };

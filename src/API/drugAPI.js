@@ -18,7 +18,7 @@ export const getAllDrug = async token => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const {data} = await axios.get(`${URL}/api/allDrugs/`, config);
+  const {data} = await axios.get(`${URL}/api/drug/allDrugs/`, config);
   return data;
 };
 

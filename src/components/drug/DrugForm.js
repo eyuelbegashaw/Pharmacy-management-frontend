@@ -10,6 +10,8 @@ const DrugForm = ({
   inputs,
   edit,
   user,
+  drugs,
+  loading,
 }) => {
   return (
     <div onSubmit={e => handleSubmit(e)} className="ms-1 mb-1">
@@ -234,28 +236,35 @@ const DrugForm = ({
           </select>
         </div>
       </div>
+      <div className="d-flex">
+        {user.isAdmin && (
+          <button className="btn theme text-white" onClick={handleSubmit}>
+            {edit === true ? "Edit" : "Add"}
+          </button>
+        )}
 
-      {user.isAdmin && (
-        <button className="btn theme text-white" onClick={handleSubmit}>
-          {edit === true ? "Edit" : "Add"}
+        {!user.isAdmin && !edit && (
+          <button className="btn theme text-white" onClick={handleSubmit}>
+            Add
+          </button>
+        )}
+
+        {edit && (
+          <button className="ms-2 btn theme text-light" onClick={handleNewUpdated}>
+            Add New
+          </button>
+        )}
+
+        <button className="ms-2 btn btn-danger" onClick={cleanForm}>
+          Clear
         </button>
-      )}
 
-      {!user.isAdmin && !edit && (
-        <button className="btn theme text-white" onClick={handleSubmit}>
-          Add
-        </button>
-      )}
-
-      {edit && (
-        <button className="ms-2 btn theme text-light" onClick={handleNewUpdated}>
-          Add New
-        </button>
-      )}
-
-      <button className="ms-2 btn btn-danger" onClick={cleanForm}>
-        Clear
-      </button>
+        {drugs.length > 0 && loading && (
+          <div className="spinner-border text-secondary  ms-2" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
