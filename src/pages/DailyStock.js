@@ -171,7 +171,7 @@ const DailyStock = () => {
             </select>
           </div>
 
-          <div className="d-flex threeButtons" style={{width: 150}}>
+          <div className="d-flex threeButtons" style={{width: 330}}>
             <div className="align-self-end" onClick={handleSubmit}>
               <button className="btn theme text-white">Show Stock</button>
             </div>
