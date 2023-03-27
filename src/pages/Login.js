@@ -148,7 +148,7 @@ const Login = () => {
         <div className="mx-3 fw-bold ">
           {!emailSent && (
             <div className="loginWidth">
-              <div className="d-flex  my-2">
+              <div className="d-flex mb-2 align-items-center">
                 <div className="fs-2 fw-bold">
                   {forgotPassword && <div>FORGOT YOUR PASSWORD? </div>}
                   {valid && <div> NEW PASSWORD </div>}
@@ -156,7 +156,7 @@ const Login = () => {
                 </div>
 
                 {loading && (
-                  <div className="spinner-border text-secondary ms-3" role="status">
+                  <div className="spinner-border text-secondary  ms-3" role="status">
                     <span className="visually-hidden">Loading...</span>
                   </div>
                 )}

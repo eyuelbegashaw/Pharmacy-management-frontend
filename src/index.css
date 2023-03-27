@@ -5,7 +5,13 @@
   display: grid;
   grid-gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  display: 100%;
+}
+
+.homeForm {
+  margin-top: 5px;
+  display: grid;
+  grid-gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
 }
 
 nav a:hover {
@@ -130,6 +136,9 @@ body {
   display: none;
 }
 
+.homeTable {
+  min-width: 400px;
+}
 @media print {
   body * {
     visibility: hidden;
@@ -182,6 +191,6 @@ body {
     margin-top: 6px;
   }
   .homeTable {
-    height: 50vh;
+    height: 250px;
   }
 }

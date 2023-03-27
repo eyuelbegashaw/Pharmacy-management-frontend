@@ -233,13 +233,13 @@ const Home = () => {
       {!print && (
         <div className="w-100">
           <ToastContainer />
-          <div className="w-100 text-white fs-4 text-center py-2 mb-2 theme d-flex justify-content-around">
+          <div className="w-100 text-white fs-4 text-center py-2 mb-2 theme d-flex justify-content-around ">
             <div>BENET PHARMACY</div>
             <Notification notifications={notifications} setNotifications={setNotifications} />
           </div>
 
           <div className="d-md-flex w-100">
-            <div className="justify-content-around mt-1 flex-fill m-3">
+            <div className="justify-content-around m-3">
               <div className="m-2">
                 <div>
                   <select
@@ -277,16 +277,15 @@ const Home = () => {
                 </div>
               </div>
             </div>
-            <div className="mt-3">
-              <div>
-                <HomeForm
-                  handleSubmit={handleSubmit}
-                  handleChange={handleChange}
-                  handleClear={handleClear}
-                  inputs={inputs}
-                />
-              </div>
-              <div className="mt-2 p-1 flex-fill">
+            <div className="flex-fill">
+              <HomeForm
+                handleSubmit={handleSubmit}
+                handleChange={handleChange}
+                handleClear={handleClear}
+                inputs={inputs}
+              />
+
+              <div className="mt-2 p-1">
                 <div className="border border-secondary">
                   <table className="table table-borderless">
                     <thead>
