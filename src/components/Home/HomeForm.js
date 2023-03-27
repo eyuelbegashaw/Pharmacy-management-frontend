@@ -56,18 +56,6 @@ const HomeForm = ({handleSubmit, handleChange, handleClear, inputs}) => {
         </div>
 
         <div className="col">
-          <label htmlFor="sellingPrice">Selling Price</label>
-          <input
-            className="form-control"
-            placeholder="selling price"
-            id="sellingPrice"
-            type="number"
-            name="selling_price"
-            value={inputs.selling_price}
-            onChange={e => handleChange(e)}
-          />
-        </div>
-        <div className="col">
           <label htmlFor="productionDate">Production Date</label>
           <input
             className="form-control"
@@ -88,6 +76,19 @@ const HomeForm = ({handleSubmit, handleChange, handleClear, inputs}) => {
             name="expiry_date"
             readOnly
             value={ConvertDate(inputs.expiry_date)}
+          />
+        </div>
+
+        <div className="col">
+          <label htmlFor="sellingPrice">Selling Price</label>
+          <input
+            className="form-control"
+            placeholder="selling price"
+            id="sellingPrice"
+            type="number"
+            name="selling_price"
+            value={inputs.selling_price}
+            onChange={e => handleChange(e)}
           />
         </div>
 
