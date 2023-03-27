@@ -1,7 +1,7 @@
 const HomeTable = ({datas, handleEdit, selectedRow, loading}) => {
   return (
     <>
-      <div className="horizontalTable table-container homeTable">
+      <div className="horizontalTable table-container tableHome">
         <table className="table table-responsive border">
           <thead>
             <tr>

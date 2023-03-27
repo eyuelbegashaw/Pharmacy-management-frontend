@@ -11,7 +11,7 @@
   margin-top: 5px;
   display: grid;
   grid-gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 nav a:hover {
@@ -135,10 +135,10 @@ body {
   border: none;
   display: none;
 }
-
 .homeTable {
-  min-width: 400px;
+  width: 350px;
 }
+
 @media print {
   body * {
     visibility: hidden;
@@ -191,6 +191,15 @@ body {
     margin-top: 6px;
   }
   .homeTable {
+    width: 100;
+  }
+  .tableHome {
     height: 250px;
+  }
+  .homeForm {
+    margin-top: 5px;
+    display: grid;
+    grid-gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   }
 }

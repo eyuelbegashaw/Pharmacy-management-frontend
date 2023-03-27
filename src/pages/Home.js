@@ -240,7 +240,7 @@ const Home = () => {
 
           <div className="d-md-flex w-100">
             <div className="justify-content-around m-3">
-              <div className="m-2">
+              <div className="m-2 homeTable">
                 <div>
                   <select
                     className="form-select select"
@@ -334,7 +334,7 @@ const Home = () => {
                     )}
 
                     <div>
-                      <button onClick={handleSell} className="btn theme text-white px-5 my-1">
+                      <button onClick={handleSell} className="btn theme text-white px-5 my-1 ms-1">
                         Sell
                       </button>
                     </div>
