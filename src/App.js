@@ -37,26 +37,22 @@ function App() {
     <userContext.Provider value={{user, setUser}}>
       <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/login/:resetLink" element={<Login />} />
-
-          <Route path="/" element={<SideNav />}>
-            <Route index element={<Home />} />
-            <Route path="drug" element={<Drug />} />
-            <Route path="followUp" element={<FollowUp />} />
-            <Route path="dailyTransaction" element={<DailyTransaction />} />
-            <Route path="profile" element={<Profile />} />
-
-            {user && user.isAdmin && (
-              <>
-                <Route path="dailyStock" element={<DailyStock />} />
-                <Route path="rangeStock" element={<RangeStock />} />
-                <Route path="rangeTransaction" element={<RangeTransaction />} />
-                <Route path="category" element={<Category />} />
-                <Route path="users" element={<Users />} />
-                <Route path="suppliers" element={<Suppliers />} />{" "}
-              </>
-            )}
+          <Route path="/">
+            <Route path="" element={<SideNav />}>
+              <Route index element={<Home />} />
+              <Route path="drug" element={<Drug />} />
+              <Route path="followUp" element={<FollowUp />} />
+              <Route path="dailyTransaction" element={<DailyTransaction />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="dailyStock" element={<DailyStock />} />
+              <Route path="rangeStock" element={<RangeStock />} />
+              <Route path="rangeTransaction" element={<RangeTransaction />} />
+              <Route path="category" element={<Category />} />
+              <Route path="users" element={<Users />} />
+              <Route path="suppliers" element={<Suppliers />} />
+            </Route>
+            <Route path="login" element={<Login />} />
+            <Route path="login/:resetLink" element={<Login />} />
           </Route>
         </Routes>
       </Router>
