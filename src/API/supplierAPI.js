@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const URL = "https://benetpharmacy-api.onrender.com";
+const URL = process.env.REACT_APP_URL;
 
 export const getSupplier = async token => {
   const config = {
