@@ -41,6 +41,7 @@ const Drug = () => {
     lowStock: 0,
   });
 
+  const [filterName, setFilterName] = useState("brand_name");
   const [category, setCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -84,15 +85,29 @@ const Drug = () => {
       let filteredData = fetchedDrugs;
       if (searchTerm.trim() !== "") {
         if (category !== "all") {
-          filteredData = filteredData.filter(
-            item =>
-              item.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-              (category === "" || item.category_id.name === category)
-          );
+          if (filterName === "generic_name") {
+            filteredData = filteredData.filter(
+              item =>
+                item.generic_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                (category === "" || item.category_id.name === category)
+            );
+          } else {
+            filteredData = filteredData.filter(
+              item =>
+                item.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                (category === "" || item.category_id.name === category)
+            );
+          }
         } else if (category === "all") {
-          filteredData = fetchedDrugs.filter(item => {
-            return item.brand_name.toLowerCase().includes(searchTerm.toLowerCase());
-          });
+          if (filterName === "generic_name") {
+            filteredData = fetchedDrugs.filter(item => {
+              return item.generic_name.toLowerCase().includes(searchTerm.toLowerCase());
+            });
+          } else {
+            filteredData = fetchedDrugs.filter(item => {
+              return item.brand_name.toLowerCase().includes(searchTerm.toLowerCase());
+            });
+          }
         }
       } else if (category !== "" && category !== "all") {
         filteredData = filteredData.filter(
@@ -101,8 +116,9 @@ const Drug = () => {
       }
       setDrugs(filteredData);
     };
+
     handleSearch();
-  }, [searchTerm, category, fetchedDrugs]);
+  }, [searchTerm, category, fetchedDrugs, filterName]);
 
   const cleanForm = () => {
     setInputs({
@@ -292,6 +308,18 @@ const Drug = () => {
               onChange={e => setSearchTerm(e.target.value)}
               placeholder="What are you looking for?"
             />
+          </div>
+
+          <div className="flex-fill border rounded border-dark me-sm-2">
+            <select
+              className="form-select"
+              id="category"
+              value={filterName}
+              onChange={e => setFilterName(e.target.value)}
+            >
+              <option value="brand_name">brand name</option>
+              <option value="generic_name">generic name</option>
+            </select>
           </div>
 
           <div className="flex-fill">

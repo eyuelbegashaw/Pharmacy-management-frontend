@@ -58,17 +58,34 @@ body {
   border-bottom: none;
 }
 
+.homeOptions {
+  border: 1px solid #000000;
+  border-bottom: none;
+}
+
+.form-select:focus {
+  border-color: #ced4da;
+  box-shadow: none;
+  outline: none;
+}
+
 .maximumWidth {
   max-width: 500px;
 }
 
-.searchTerm {
+.homeSelect {
   border: 1px solid #000000;
+
+  border-left: none;
   border-bottom: none;
+}
+
+.searchTerm {
   padding: 17px;
   height: 20px;
   outline: none;
   color: #9dbfaf;
+  border: none;
 }
 
 .searchTerm:focus {
@@ -136,7 +153,7 @@ body {
   display: none;
 }
 .homeTable {
-  width: 350px;
+  width: 400px;
 }
 
 @media print {
@@ -191,7 +208,7 @@ body {
     margin-top: 6px;
   }
   .homeTable {
-    width: 100;
+    width: 100%;
   }
   .tableHome {
     height: 250px;

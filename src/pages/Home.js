@@ -44,6 +44,7 @@ const Home = () => {
     measurement_size: "",
   });
 
+  const [filterName, setFilterName] = useState("brand_name");
   const [category, setCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRow, setSelectedRow] = useState("");
@@ -98,15 +99,29 @@ const Home = () => {
       let filteredData = fetchedDrugs;
       if (searchTerm.trim() !== "") {
         if (category !== "all") {
-          filteredData = filteredData.filter(
-            item =>
-              item.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-              (category === "" || item.category_id.name === category)
-          );
+          if (filterName === "generic_name") {
+            filteredData = filteredData.filter(
+              item =>
+                item.generic_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                (category === "" || item.category_id.name === category)
+            );
+          } else {
+            filteredData = filteredData.filter(
+              item =>
+                item.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                (category === "" || item.category_id.name === category)
+            );
+          }
         } else if (category === "all") {
-          filteredData = fetchedDrugs.filter(item => {
-            return item.brand_name.toLowerCase().includes(searchTerm.toLowerCase());
-          });
+          if (filterName === "generic_name") {
+            filteredData = fetchedDrugs.filter(item => {
+              return item.generic_name.toLowerCase().includes(searchTerm.toLowerCase());
+            });
+          } else {
+            filteredData = fetchedDrugs.filter(item => {
+              return item.brand_name.toLowerCase().includes(searchTerm.toLowerCase());
+            });
+          }
         }
       } else if (category !== "" && category !== "all") {
         filteredData = filteredData.filter(
@@ -117,7 +132,7 @@ const Home = () => {
     };
 
     handleSearch();
-  }, [searchTerm, category, fetchedDrugs]);
+  }, [searchTerm, category, fetchedDrugs, filterName]);
 
   const handleChange = e => {
     const name = e.target.name;
@@ -233,7 +248,7 @@ const Home = () => {
       {!print && (
         <div className="w-100">
           <ToastContainer />
-          <div className="w-100 text-white fs-4 text-center py-2 mb-2 theme d-flex justify-content-around ">
+          <div className="w-100 text-white fs-4 text-center py-1  mb-2 theme d-flex justify-content-around ">
             <div>BENET PHARMACY</div>
             <Notification notifications={notifications} setNotifications={setNotifications} />
           </div>
@@ -257,14 +272,26 @@ const Home = () => {
                     ))}
                   </select>
                 </div>
-
-                <div>
-                  <input
-                    type="text"
-                    className="searchTerm w-100"
-                    onChange={e => setSearchTerm(e.target.value)}
-                    placeholder="What are you looking for?"
-                  />
+                <div className="d-flex homeOptions">
+                  <div className="flex-fill">
+                    <input
+                      type="text"
+                      className="searchTerm w-100"
+                      onChange={e => setSearchTerm(e.target.value)}
+                      placeholder="What are you looking for?"
+                    />
+                  </div>
+                  <div style={{width: 141}}>
+                    <select
+                      className="form-select"
+                      id="category"
+                      value={filterName}
+                      onChange={e => setFilterName(e.target.value)}
+                    >
+                      <option value="brand_name">brand name</option>
+                      <option value="generic_name">generic name</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>
