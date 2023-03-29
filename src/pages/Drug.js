@@ -64,12 +64,13 @@ const Drug = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const categories = await categoryAPI.getCategory(user.token);
-        const suppliers = await supplierAPI.getSupplier(user.token);
         const response = await drugAPI.getAllDrug(user.token);
         setDrugs(response);
         setFetcheDrugs(response);
+
+        const categories = await categoryAPI.getCategory(user.token);
         setCategories(categories);
+        const suppliers = await supplierAPI.getSupplier(user.token);
         setSuppliers(suppliers);
         setLoading(false);
       } catch (error) {

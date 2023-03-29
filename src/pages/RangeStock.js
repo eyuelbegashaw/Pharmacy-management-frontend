@@ -32,7 +32,7 @@ const RangeStock = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await drugAPI.getDrug(user.token);
+        const response = await drugAPI.getAllDrug(user.token);
         setDrugs(response);
         setLoading(false);
       } catch (error) {
@@ -96,7 +96,7 @@ const RangeStock = () => {
   const handleClear = async () => {
     try {
       setLoading(true);
-      const response = await drugAPI.getDrug(user.token);
+      const response = await drugAPI.getAllDrug(user.token);
       setDrugs(response);
       setStartDate("");
       setEndDate("");

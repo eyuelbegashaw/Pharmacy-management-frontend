@@ -47,9 +47,9 @@ const DailyTransaction = () => {
           );
           setDatas(result);
         } else {
-          const result = await userAPI.getUsers(user.token);
           const response = await transactionAPI.getTransaction(user.token);
           setDatas(response);
+          const result = await userAPI.getUsers(user.token);
           setUsers(result);
         }
         setLoading(false);

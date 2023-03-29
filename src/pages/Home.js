@@ -84,8 +84,8 @@ const Home = () => {
     const fetchData = async () => {
       try {
         const categories = await categoryAPI.getCategory(user.token);
-        const response = await NotificationAPI.getNotification(user.token);
         setCategories(categories);
+        const response = await NotificationAPI.getNotification(user.token);
         setNotifications(response);
       } catch (error) {
         toast.error(errorMessage(error));

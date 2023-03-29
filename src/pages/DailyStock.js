@@ -40,9 +40,10 @@ const DailyStock = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const result = await supplierAPI.getSupplier(user.token);
-        const response = await drugAPI.getDrug(user.token);
+        const response = await drugAPI.getAllDrug(user.token);
         setDatas(response);
+
+        const result = await supplierAPI.getSupplier(user.token);
         setSuppliers(result);
         setLoading(false);
       } catch (error) {
@@ -77,7 +78,7 @@ const DailyStock = () => {
   const handleClear = async () => {
     try {
       setLoading(true);
-      const response = await drugAPI.getDrug(user.token);
+      const response = await drugAPI.getAllDrug(user.token);
       setDatas(response);
       setSelected("daily");
       setDailyDate("");
