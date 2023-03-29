@@ -68,11 +68,9 @@ const Home = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const categories = await categoryAPI.getCategory(user.token);
         const drugs = await drugAPI.getDrug(user.token);
         setDrugs(drugs);
         setFetchedDrugs(drugs);
-        setCategories(categories);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -85,7 +83,9 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const categories = await categoryAPI.getCategory(user.token);
         const response = await NotificationAPI.getNotification(user.token);
+        setCategories(categories);
         setNotifications(response);
       } catch (error) {
         toast.error(errorMessage(error));
