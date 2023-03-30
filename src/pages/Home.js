@@ -22,7 +22,7 @@ import * as transactionAPI from "../API/transactionAPI";
 import * as NotificationAPI from "../API/notificationAPI";
 
 import io from "socket.io-client";
-const socket = io.connect(process.env.REACT_APP_URL, {transports: ["websocket"]});
+const socket = io.connect(process.env.REACT_APP_URL);
 
 const Home = () => {
   const navigate = useNavigate();
@@ -62,12 +62,6 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    socket.on("drugUpdate", data => {
-      setDrugs(data);
-    });
-  }, [socket]);
-
-  useEffect(() => {
     if (!user || user.status !== "active") {
       navigate("/login");
     }
@@ -88,6 +82,12 @@ const Home = () => {
     };
     fetchData();
   }, [user.token]);
+
+  useEffect(() => {
+    socket.on("drugUpdate", data => {
+      setDrugs(data);
+    });
+  }, [socket]);
 
   useEffect(() => {
     const fetchData = async () => {
