@@ -22,7 +22,7 @@ import * as transactionAPI from "../API/transactionAPI";
 import * as NotificationAPI from "../API/notificationAPI";
 
 import io from "socket.io-client";
-const socket = io.connect(process.env.REACT_APP_URL);
+const socket = io.connect(process.env.REACT_APP_URL, {transports: ["websocket"]});
 
 const Home = () => {
   const navigate = useNavigate();
