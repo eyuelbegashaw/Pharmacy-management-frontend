@@ -21,6 +21,9 @@ import * as categoryAPI from "../API/categoryAPI";
 import * as transactionAPI from "../API/transactionAPI";
 import * as NotificationAPI from "../API/notificationAPI";
 
+import io from "socket.io-client";
+const socket = io.connect(process.env.REACT_APP_URL, {transports: ["websocket"]});
+
 const Home = () => {
   const navigate = useNavigate();
 
@@ -57,6 +60,12 @@ const Home = () => {
   const [notifications, setNotifications] = useState([]);
 
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    socket.on("drugUpdate", data => {
+      setDrugs(data);
+    });
+  }, [socket]);
 
   useEffect(() => {
     if (!user || user.status !== "active") {
