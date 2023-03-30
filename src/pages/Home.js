@@ -21,10 +21,7 @@ import * as categoryAPI from "../API/categoryAPI";
 import * as transactionAPI from "../API/transactionAPI";
 import * as NotificationAPI from "../API/notificationAPI";
 
-import io from "socket.io-client";
-const socket = io(process.env.REACT_APP_URL, {transports: ["websocket"]});
-
-const Home = () => {
+const Home = ({socket}) => {
   const navigate = useNavigate();
 
   const {user} = useContext(userContext);

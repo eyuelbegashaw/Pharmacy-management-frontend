@@ -21,6 +21,9 @@ import RangeTransaction from "./pages/RangeTransaction";
 //Global State
 import {userContext} from "./context/globalState";
 
+import io from "socket.io-client";
+const socket = io(process.env.REACT_APP_URL, {transports: ["websocket"]});
+
 function App() {
   const [user, setUser] = useState("");
 
@@ -39,7 +42,7 @@ function App() {
         <Routes>
           <Route path="/">
             <Route path="" element={<SideNav />}>
-              <Route index element={<Home />} />
+              <Route index element={<Home socket={socket} />} />
               <Route path="drug" element={<Drug />} />
               <Route path="followUp" element={<FollowUp />} />
               <Route path="dailyTransaction" element={<DailyTransaction />} />
