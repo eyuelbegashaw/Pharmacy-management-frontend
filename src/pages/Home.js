@@ -65,10 +65,21 @@ const Home = ({socket}) => {
   }, [user, navigate]);
 
   useEffect(() => {
+    socket.on("drugUpdate", data => {
+      console.log("data", data);
+      console.log("calling socket");
+      setDrugs(data);
+      console.log("getting socket");
+    });
+  }, [socket]);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        console.log("calling drugs");
         const drugs = await drugAPI.getDrug(user.token);
+        console.log("getting drugs");
         setDrugs(drugs);
         setFetchedDrugs(drugs);
         setLoading(false);
@@ -79,12 +90,6 @@ const Home = ({socket}) => {
     };
     fetchData();
   }, [user.token]);
-
-  useEffect(() => {
-    socket.on("drugUpdate", data => {
-      setDrugs(data);
-    });
-  }, [socket]);
 
   useEffect(() => {
     const fetchData = async () => {
