@@ -10,8 +10,7 @@ const DrugForm = ({
   inputs,
   edit,
   user,
-  drugs,
-  loading,
+  allDrugsLoading,
 }) => {
   return (
     <div onSubmit={e => handleSubmit(e)} className="ms-1 mb-1">
@@ -259,7 +258,7 @@ const DrugForm = ({
           Clear
         </button>
 
-        {drugs.length > 0 && loading && (
+        {allDrugsLoading && (
           <div className="spinner-border text-secondary  ms-2" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>

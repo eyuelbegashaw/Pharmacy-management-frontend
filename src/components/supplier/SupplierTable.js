@@ -1,4 +1,4 @@
-const SupplierTable = ({datas, handleDelete, handleEdit, loading}) => {
+const SupplierTable = ({suppliers, handleDelete, handleEdit, suppliersLoading}) => {
   return (
     <>
       <table className="table table-striped table-responsive">
@@ -12,14 +12,14 @@ const SupplierTable = ({datas, handleDelete, handleEdit, loading}) => {
           </tr>
         </thead>
         <tbody>
-          {datas.map((data, index) => (
+          {suppliers.map((supplier, index) => (
             <tr key={index}>
-              <td>{data.name} </td>
-              <td>{data.phone_number} </td>
+              <td>{supplier.name} </td>
+              <td>{supplier.phone_number} </td>
               <td>
                 <a
                   className="links"
-                  href={`${data.image}`}
+                  href={`${supplier.image}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -28,24 +28,32 @@ const SupplierTable = ({datas, handleDelete, handleEdit, loading}) => {
               </td>
 
               <td>
-                <button className="border-0" onClick={() => handleEdit(data._id)}>
+                <button className="border-0" onClick={() => handleEdit(supplier._id)}>
                   <i className="fas fa-edit"></i>
                 </button>
               </td>
               <td>
-                <button className="border-0" onClick={() => handleDelete(data._id)}>
+                <button className="border-0" onClick={() => handleDelete(supplier._id)}>
                   <i className="fa fa-trash text-danger" aria-hidden="true"></i>
                 </button>
               </td>
             </tr>
           ))}
 
-          {datas.length === 0 && loading && (
+          {suppliers.length === 0 && suppliersLoading && (
             <tr>
               <td colSpan="5" className="text-center">
                 <div className="spinner-border text-secondary my-2 me-2" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
+              </td>
+            </tr>
+          )}
+
+          {suppliers.length === 0 && !suppliersLoading && (
+            <tr>
+              <td colSpan="5" className="text-center">
+                <span className="text-danger">No Data Available</span>
               </td>
             </tr>
           )}

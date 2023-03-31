@@ -1,14 +1,12 @@
 import {useNavigate} from "react-router-dom";
-import {useState, useEffect, useContext} from "react";
-import {userContext} from "../context/globalState";
+import {useState, useEffect} from "react";
+import {useGlobalState} from "../context/GlobalProvider";
 
 //API
 import * as drugAPI from "../API/drugAPI";
-import * as supplierAPI from "../API/supplierAPI";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
-import {ToastContainer, toast} from "react-toastify";
+import {toast} from "react-toastify";
 
 //Util
 import {errorMessage} from "../util/error";
@@ -17,17 +15,15 @@ import {fixedTwoDigit} from "../util/twoDigit";
 
 const DailyStock = () => {
   const navigate = useNavigate();
-  const {user} = useContext(userContext);
 
-  const [loading, setLoading] = useState(false);
-  const [datas, setDatas] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
+  const {user, allDrugs, suppliers, loading, setLoading} = useGlobalState();
+  const {drugsLoading} = loading;
 
+  const [filteredStock, setFilteredStock] = useState(allDrugs);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [dailyDate, setDailyDate] = useState("");
   const [supplier, setSupplier] = useState("");
-
   const [selected, setSelected] = useState("daily");
 
   useEffect(() => {
@@ -37,64 +33,41 @@ const DailyStock = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await drugAPI.getAllDrug(user.token);
-        setDatas(response);
-
-        const result = await supplierAPI.getSupplier(user.token);
-        setSuppliers(result);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toast.error(errorMessage(error));
-      }
-    };
-    fetchData();
-  }, [user.token]);
+    setFilteredStock(allDrugs);
+  }, [allDrugs]);
 
   const handleSubmit = async () => {
     try {
-      setLoading(true);
+      setLoading(prevState => ({...prevState, drugsLoading: true}));
       if (selected === "daily") {
         const result = await drugAPI.getDailyStock({startDate: dailyDate, supplier}, user.token);
-        setDatas(result);
+        setFilteredStock(result);
       } else if (selected === "range") {
         if ((startDate === "" && endDate !== "") || (startDate !== "" && endDate === "")) {
           toast.error("Both dates have to be filled or Both dates have to be empty");
         } else {
           const result = await drugAPI.getDailyStock({startDate, endDate, supplier}, user.token);
-          setDatas(result);
+          setFilteredStock(result);
         }
       }
-      setLoading(false);
+      setLoading(prevState => ({...prevState, drugsLoading: false}));
     } catch (error) {
-      setLoading(false);
+      setLoading(prevState => ({...prevState, drugsLoading: false}));
       toast.error(errorMessage(error));
     }
   };
 
-  const handleClear = async () => {
-    try {
-      setLoading(true);
-      const response = await drugAPI.getAllDrug(user.token);
-      setDatas(response);
-      setSelected("daily");
-      setDailyDate("");
-      setStartDate("");
-      setEndDate("");
-      setSupplier("");
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      toast.error(errorMessage(error));
-    }
+  const handleClear = () => {
+    setFilteredStock(allDrugs);
+    setSelected("daily");
+    setDailyDate("");
+    setStartDate("");
+    setEndDate("");
+    setSupplier("");
   };
 
   return (
     <div className="w-100">
-      <ToastContainer />
       <div className="w-100 text-white fs-4 text-center py-2 theme">Stock Report</div>
       <div>
         <div className="d-md-flex justify-content-around ms-2">
@@ -172,18 +145,18 @@ const DailyStock = () => {
             </select>
           </div>
 
-          <div className="d-flex threeButtons" style={{width: 330}}>
-            <div className="align-self-end" onClick={handleSubmit}>
+          <div className="d-flex threeButtons align-items-end" style={{width: 330}}>
+            <div onClick={handleSubmit}>
               <button className="btn theme text-white">Show Stock</button>
             </div>
-            <div className="align-self-end" onClick={handleClear}>
+            <div onClick={handleClear}>
               <button className="ms-2 btn btn-danger">Clear</button>
             </div>
-            <div className="ms-4 align-self-end" onClick={() => window.print()}>
+            <div className="ms-4" onClick={() => window.print()}>
               <button className="btn theme text-white">Print</button>
             </div>
-            {datas.length > 0 && loading && (
-              <div className="spinner-border text-secondary mb-1 ms-1" role="status">
+            {filteredStock.length > 0 && drugsLoading && (
+              <div className="spinner-border text-secondary mb-1 ms-2" role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
             )}
@@ -204,39 +177,39 @@ const DailyStock = () => {
               </tr>
             </thead>
             <tbody>
-              {datas.length !== 0 &&
-                datas.map((data, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>{ConvertDate(data.purchased_date)} </td>
-                    <td>{data.brand_name} </td>
-                    <td>{data.batch_number} </td>
-                    <td>
-                      {data.supplier_id ? (
-                        data.supplier_id.name
-                      ) : (
-                        <span className="text-danger">DELETED</span>
-                      )}
-                    </td>
-                    <td>{data.quantity} </td>
-                    <td>{data.purchased_quantity} </td>
-                    <td>{fixedTwoDigit(data.purchased_price)} </td>
-                  </tr>
-                ))}
-              {datas.length !== 0 && (
+              {filteredStock.map((drug, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>{ConvertDate(drug.purchased_date)} </td>
+                  <td>{drug.brand_name} </td>
+                  <td>{drug.batch_number} </td>
+                  <td>
+                    {drug.supplier_id ? (
+                      drug.supplier_id.name
+                    ) : (
+                      <span className="text-danger">DELETED</span>
+                    )}
+                  </td>
+                  <td>{drug.quantity} </td>
+                  <td>{drug.purchased_quantity} </td>
+                  <td>{fixedTwoDigit(drug.purchased_price)} </td>
+                </tr>
+              ))}
+              {filteredStock.length !== 0 && (
                 <tr className="bottom">
                   <th colSpan="1"></th>
                   <th colSpan="2">
-                    Gross Remaining Quantity = {datas.reduce((acc, curr) => acc + curr.quantity, 0)}
+                    Gross Remaining Quantity ={" "}
+                    {filteredStock.reduce((acc, curr) => acc + curr.quantity, 0)}
                   </th>
                   <th colSpan="2">
                     Gross Purchased Quantity ={" "}
-                    {datas.reduce((acc, curr) => acc + curr.purchased_quantity, 0)}
+                    {filteredStock.reduce((acc, curr) => acc + curr.purchased_quantity, 0)}
                   </th>
                   <th colSpan="3">
                     Gross Purchased Price ={" "}
                     {fixedTwoDigit(
-                      datas.reduce(
+                      filteredStock.reduce(
                         (acc, curr) => acc + curr.purchased_quantity * curr.purchased_price,
                         0
                       )
@@ -245,12 +218,20 @@ const DailyStock = () => {
                 </tr>
               )}
 
-              {datas.length === 0 && loading && (
+              {filteredStock.length === 0 && drugsLoading && (
                 <tr>
                   <td colSpan="8" className="text-center">
                     <div className="spinner-border text-secondary my-2 me-2" role="status">
                       <span className="visually-hidden">Loading...</span>
                     </div>
+                  </td>
+                </tr>
+              )}
+
+              {filteredStock.length === 0 && !drugsLoading && (
+                <tr>
+                  <td colSpan="8" className="text-center">
+                    <span className="text-danger">No Data Available</span>
                   </td>
                 </tr>
               )}

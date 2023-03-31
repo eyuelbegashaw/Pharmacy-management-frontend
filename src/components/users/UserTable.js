@@ -1,4 +1,4 @@
-const UserTable = ({datas, handleDelete, handleEdit, loading}) => {
+const UserTable = ({users, handleDelete, handleEdit, usersLoading}) => {
   return (
     <>
       <div className="horizontalTable">
@@ -17,23 +17,23 @@ const UserTable = ({datas, handleDelete, handleEdit, loading}) => {
             </tr>
           </thead>
           <tbody>
-            {datas.map((data, index) => (
+            {users.map((user, index) => (
               <tr key={index}>
-                <td>{data.name} </td>
-                <td>{data.isAdmin ? "True" : "False"} </td>
-                <td>{data.gender} </td>
-                <td>{data.phone_number} </td>
-                <td>{data.status} </td>
-                <td>{data.email} </td>
+                <td>{user.name} </td>
+                <td>{user.isAdmin ? "True" : "False"} </td>
+                <td>{user.gender} </td>
+                <td>{user.phone_number} </td>
+                <td>{user.status} </td>
+                <td>{user.email} </td>
 
                 <td>
-                  <button className="border-0" onClick={() => handleEdit(data._id)}>
+                  <button className="border-0" onClick={() => handleEdit(user._id)}>
                     <i className="fas fa-edit"></i>
                   </button>
                 </td>
-                {data._id !== "641e1b2cead8aac02d79092e" && (
+                {user._id !== "641e1b2cead8aac02d79092e" && (
                   <td>
-                    <button className="border-0" onClick={() => handleDelete(data._id)}>
+                    <button className="border-0" onClick={() => handleDelete(user._id)}>
                       <i className="fa fa-trash text-danger" aria-hidden="true"></i>
                     </button>
                   </td>
@@ -41,12 +41,20 @@ const UserTable = ({datas, handleDelete, handleEdit, loading}) => {
               </tr>
             ))}
 
-            {datas.length === 0 && loading && (
+            {users.length === 0 && usersLoading && (
               <tr>
                 <td colSpan="8" className="text-center">
                   <div class="spinner-border text-secondary my-2 me-2" role="status">
                     <span class="visually-hidden">Loading...</span>
                   </div>
+                </td>
+              </tr>
+            )}
+
+            {users.length === 0 && !usersLoading && (
+              <tr>
+                <td colSpan="8" className="text-center">
+                  <span class="text-danger">No Data Available</span>
                 </td>
               </tr>
             )}

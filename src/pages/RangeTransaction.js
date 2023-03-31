@@ -1,26 +1,25 @@
-import {useState, useEffect, useContext} from "react";
-import {userContext} from "../context/globalState";
+import {useState, useEffect} from "react";
+import {useGlobalState} from "../context/GlobalProvider";
 
 //API
 import * as transactionAPI from "../API/transactionAPI";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
-import {ToastContainer, toast} from "react-toastify";
+import {toast} from "react-toastify";
 import {useNavigate} from "react-router-dom";
 
+//Utils
 import {errorMessage} from "../util/error";
 import {ConvertDate} from "../util/date";
 import {fixedTwoDigit} from "../util/twoDigit";
 
 const RangeTransaction = () => {
   const navigate = useNavigate();
-  const {user} = useContext(userContext);
+  const {user, transactions, loading, setLoading} = useGlobalState();
+  const {transactionsLoading} = loading;
 
-  const [loading, setLoading] = useState(false);
-  const [transactions, setTransactions] = useState([]);
+  const [filteredTransaction, setFilteredTransaction] = useState(transactions);
   const [groupedTransactions, setGroupedTransactions] = useState([]);
-
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -31,25 +30,14 @@ const RangeTransaction = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await transactionAPI.getTransaction(user.token);
-        setTransactions(response);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toast.error(errorMessage(error));
-      }
-    };
-    fetchData();
-  }, [user.token]);
+    setFilteredTransaction(transactions);
+  }, [transactions]);
 
   useEffect(() => {
     const groupTransactionsByDate = () => {
       const dailySummaries = {};
 
-      transactions.forEach(transaction => {
+      filteredTransaction.forEach(transaction => {
         const date = ConvertDate(transaction.date);
         if (!dailySummaries[date]) {
           dailySummaries[date] = {
@@ -70,41 +58,32 @@ const RangeTransaction = () => {
     };
 
     groupTransactionsByDate();
-  }, [transactions]);
+  }, [filteredTransaction]);
 
   const handleSubmit = async () => {
     if (startDate === "" || endDate === "") {
       toast.error("Both dates are required");
     } else {
       try {
-        setLoading(true);
+        setLoading(prevState => ({...prevState, transactionsLoading: true}));
         const response = await transactionAPI.getDailyTransaction({startDate, endDate}, user.token);
-        setTransactions(response);
-        setLoading(false);
+        setFilteredTransaction(response);
+        setLoading(prevState => ({...prevState, transactionsLoading: false}));
       } catch (error) {
-        setLoading(false);
+        setLoading(prevState => ({...prevState, transactionsLoading: false}));
         toast.error(errorMessage(error));
       }
     }
   };
 
-  const handleClear = async () => {
-    try {
-      setLoading(true);
-      const response = await transactionAPI.getTransaction(user.token);
-      setTransactions(response);
-      setStartDate("");
-      setEndDate("");
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      toast.error(errorMessage(error));
-    }
+  const handleClear = () => {
+    setFilteredTransaction(transactions);
+    setStartDate("");
+    setEndDate("");
   };
 
   return (
     <div className="w-100">
-      <ToastContainer />
       <div className="w-100 theme text-white fs-4 text-center py-2">Transaction Report</div>
       <div>
         <div className="d-md-flex justify-content-around ms-2">
@@ -145,7 +124,7 @@ const RangeTransaction = () => {
             <div className="ms-4 align-self-end" onClick={() => window.print()}>
               <button className="btn theme text-white">Print</button>
             </div>
-            {groupedTransactions.length > 0 && loading && (
+            {groupedTransactions.length > 0 && transactionsLoading && (
               <div className="spinner-border text-secondary mb-1 ms-1" role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
@@ -174,12 +153,20 @@ const RangeTransaction = () => {
                 </tr>
               ))}
 
-              {groupedTransactions.length === 0 && loading && (
+              {groupedTransactions.length === 0 && transactionsLoading && (
                 <tr>
                   <td colSpan="5" className="text-center">
                     <div className="spinner-border text-secondary my-2 me-2" role="status">
                       <span className="visually-hidden">Loading...</span>
                     </div>
+                  </td>
+                </tr>
+              )}
+
+              {groupedTransactions.length === 0 && !transactionsLoading && (
+                <tr>
+                  <td colSpan="5" className="text-center">
+                    <span className="text-danger">No Data Available</span>
                   </td>
                 </tr>
               )}

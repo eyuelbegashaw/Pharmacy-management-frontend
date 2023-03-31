@@ -1,12 +1,11 @@
-import {userContext} from "../context/globalState";
+import {useGlobalState} from "../context/GlobalProvider";
 import {useNavigate, useParams} from "react-router-dom";
-import {useState, useContext, useEffect} from "react";
+import {useState, useEffect} from "react";
 
 //APIS
 import * as authenicationAPI from "../API/authentication";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
 import {ToastContainer, toast} from "react-toastify";
 
 //Util
@@ -17,7 +16,7 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const {setUser} = useContext(userContext);
+  const {setUser} = useGlobalState();
 
   const [formData, setFormData] = useState({
     email: "",

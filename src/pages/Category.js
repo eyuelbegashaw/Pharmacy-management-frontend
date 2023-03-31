@@ -1,47 +1,30 @@
 import {useNavigate} from "react-router-dom";
-import {useState, useEffect, useContext} from "react";
-import {userContext} from "../context/globalState";
+import {useState, useEffect} from "react";
+import {useGlobalState} from "../context/GlobalProvider";
 
 //API
 import * as categoryAPI from "../API/categoryAPI";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
-import {ToastContainer, toast} from "react-toastify";
+import {toast} from "react-toastify";
 
 //Util
 import {errorMessage} from "../util/error";
 
 const Category = () => {
   const navigate = useNavigate();
+  const {user, categories, setCategories, loading, setLoading} = useGlobalState();
+  const {categoriesLoading} = loading;
 
-  const [loading, setLoading] = useState(false);
-  const {user} = useContext(userContext);
-  const [inputs, setInputs] = useState({id: "", name: ""});
-  const [categories, setCategories] = useState([]);
   const [edit, setEdit] = useState(false);
   const [create, setCreate] = useState(false);
+  const [inputs, setInputs] = useState({id: "", name: ""});
 
   useEffect(() => {
     if (!user || user.status !== "active" || user.isAdmin !== true) {
       navigate("/login");
     }
   }, [user, navigate]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await categoryAPI.getCategory(user.token);
-        setCategories(response);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toast.error(errorMessage(error));
-      }
-    };
-    fetchData();
-  }, [user.token]);
 
   const handleChange = e => {
     const name = e.target.name;
@@ -65,20 +48,20 @@ const Category = () => {
     if (inputs.name === "") {
       toast.error("Please make sure all fields are filled in correctly");
     } else {
-      setLoading(true);
+      setLoading(prevState => ({...prevState, categoriesLoading: true}));
       try {
         if (edit) {
           const updated = await categoryAPI.updateCategory(inputs, user.token);
           setCategories(categories.map(value => (value._id === inputs.id ? updated : value)));
-          toast.success("Edited successfully");
+          toast.success("Category edited successfully");
         } else if (create) {
           const newData = await categoryAPI.createCategory(inputs, user.token);
           setCategories([...categories, newData]);
-          toast.success("New data added successfully");
+          toast.success("Category added successfully");
         }
-        setLoading(false);
+        setLoading(prevState => ({...prevState, categoriesLoading: false}));
       } catch (error) {
-        setLoading(false);
+        setLoading(prevState => ({...prevState, categoriesLoading: false}));
         toast.error(errorMessage(error));
       }
     }
@@ -111,7 +94,6 @@ const Category = () => {
   return (
     <div className="w-100">
       <div className="w-100 text-white fs-4 text-center py-2 mb-2  theme">Category Management</div>
-      <ToastContainer />
       <div className="m-2">
         <div>
           {!create && !edit && (
@@ -148,7 +130,7 @@ const Category = () => {
                     </button>
                   </div>
 
-                  {categories.length > 0 && loading && (
+                  {categories.length > 0 && categoriesLoading && (
                     <div className="spinner-border text-secondary mt-1 ms-2" role="status">
                       <span className="visually-hidden">Loading...</span>
                     </div>
@@ -185,12 +167,20 @@ const Category = () => {
                   </td>
                 </tr>
               ))}
-              {categories.length === 0 && loading && (
+              {categories.length === 0 && categoriesLoading && (
                 <tr>
                   <td colSpan="4" className="text-center">
                     <div className="spinner-border text-secondary my-2 me-2" role="status">
                       <span className="visually-hidden">Loading...</span>
                     </div>
+                  </td>
+                </tr>
+              )}
+
+              {categories.length === 0 && !categoriesLoading && (
+                <tr>
+                  <td colSpan="4" className="text-center">
+                    <span className="visually-hidden">No Data Available</span>
                   </td>
                 </tr>
               )}

@@ -1,4 +1,3 @@
-import {useState, useEffect} from "react";
 import {HashRouter as Router, Routes, Route} from "react-router-dom";
 
 //Components
@@ -18,31 +17,17 @@ import RangeStock from "./pages/RangeStock";
 import DailyTransaction from "./pages/DailyTransaction";
 import RangeTransaction from "./pages/RangeTransaction";
 
-//Global State
-import {userContext} from "./context/globalState";
-
-import io from "socket.io-client";
-const socket = io(process.env.REACT_APP_URL, {transports: ["websocket"]});
+//Global state
+import {GlobalStateProvider} from "./context/GlobalProvider";
 
 function App() {
-  const [user, setUser] = useState("");
-
-  useEffect(() => {
-    const token = JSON.parse(localStorage.getItem("user"));
-    if (token) {
-      setUser(token);
-    } else {
-      setUser(null);
-    }
-  }, []);
-
   return (
-    <userContext.Provider value={{user, setUser}}>
+    <GlobalStateProvider>
       <Router>
         <Routes>
           <Route path="/">
             <Route path="" element={<SideNav />}>
-              <Route index element={<Home socket={socket} />} />
+              <Route index element={<Home />} />
               <Route path="drug" element={<Drug />} />
               <Route path="followUp" element={<FollowUp />} />
               <Route path="dailyTransaction" element={<DailyTransaction />} />
@@ -59,7 +44,7 @@ function App() {
           </Route>
         </Routes>
       </Router>
-    </userContext.Provider>
+    </GlobalStateProvider>
   );
 }
 

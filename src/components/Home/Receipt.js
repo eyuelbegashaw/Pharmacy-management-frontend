@@ -1,7 +1,7 @@
 import {useState} from "react";
-import numberToWord from "../util/converter";
+import numberToWord from "../../util/converter";
 
-import {ConvertDate} from "../util/date";
+import {ConvertDate} from "../../util/date";
 
 const Receipt = ({transaction, setPrint}) => {
   const [inputs, setInputs] = useState({

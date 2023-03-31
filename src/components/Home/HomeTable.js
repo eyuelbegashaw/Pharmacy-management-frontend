@@ -1,4 +1,4 @@
-const HomeTable = ({datas, handleEdit, selectedRow, loading}) => {
+const HomeTable = ({drugs, handleEdit, selectedRow, drugsLoading}) => {
   return (
     <>
       <div className="horizontalTable table-container tableHome">
@@ -12,26 +12,34 @@ const HomeTable = ({datas, handleEdit, selectedRow, loading}) => {
             </tr>
           </thead>
           <tbody>
-            {datas.length > 0 &&
-              datas.map((data, index) => (
+            {drugs.length > 0 &&
+              drugs.map((drug, index) => (
                 <tr
                   key={index}
-                  onClick={() => handleEdit(data._id)}
-                  className={data._id === selectedRow ? "selected-row" : ""}
+                  onClick={() => handleEdit(drug._id)}
+                  className={drug._id === selectedRow ? "selected-row" : ""}
                 >
                   <td>{index + 1}</td>
-                  <td>{data.brand_name} </td>
-                  <td>{data.generic_name} </td>
-                  <td>{data.quantity} </td>
+                  <td>{drug.brand_name} </td>
+                  <td>{drug.generic_name} </td>
+                  <td>{drug.quantity} </td>
                 </tr>
               ))}
 
-            {datas.length === 0 && loading && (
+            {drugs.length === 0 && drugsLoading && (
               <tr>
                 <td colSpan="4" className="text-center">
                   <div className="spinner-border text-secondary my-2 me-2" role="status">
                     <span className="visually-hidden">Loading...</span>
                   </div>
+                </td>
+              </tr>
+            )}
+
+            {drugs.length === 0 && !drugsLoading && (
+              <tr>
+                <td colSpan="4" className="text-center">
+                  <span className="text-danger">No Data Available</span>
                 </td>
               </tr>
             )}

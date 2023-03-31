@@ -1,10 +1,10 @@
 import {toast} from "react-toastify";
 import {useContext} from "react";
-import {userContext} from "../../context/globalState";
+import {useGlobalState} from "../../context/GlobalProvider";
 import * as NotificationAPI from "../../API/notificationAPI";
 
 const Notification = ({notifications, setNotifications}) => {
-  const {user} = useContext(userContext);
+  const {user} = useGlobalState();
   const handleReadNotification = async () => {
     try {
       await NotificationAPI.readNotification(user.token);

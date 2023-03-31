@@ -1,4 +1,11 @@
-const SupplierForm = ({handleSubmit, handleChange, inputs, edit, suppliers, loading}) => {
+const SupplierForm = ({
+  handleSubmit,
+  handleChange,
+  inputs,
+  edit,
+  suppliersLength,
+  suppliersLoading,
+}) => {
   return (
     <form onSubmit={e => handleSubmit(e)}>
       <div style={{width: 500}}>
@@ -51,7 +58,7 @@ const SupplierForm = ({handleSubmit, handleChange, inputs, edit, suppliers, load
             className="btn theme text-white"
           />
         </div>
-        {suppliers.length > 0 && loading && (
+        {suppliersLength > 0 && suppliersLoading && (
           <div className="spinner-border text-secondary mt-1 ms-2" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>

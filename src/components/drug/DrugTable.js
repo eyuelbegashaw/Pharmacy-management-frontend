@@ -1,5 +1,5 @@
 import {ConvertDate} from "../../util/date";
-const DrugTable = ({drugs, handleDelete, handleEdit, selectedRow, loading}) => {
+const DrugTable = ({drugs, handleDelete, handleEdit, selectedRow, allDrugsLoading}) => {
   return (
     <>
       <div className="table-container ms-1">
@@ -66,19 +66,30 @@ const DrugTable = ({drugs, handleDelete, handleEdit, selectedRow, loading}) => {
                   </td>
 
                   <td>
-                    <button className="border-0" onClick={() => handleDelete(drug._id)}>
+                    <button
+                      className="border-0 deleteButton"
+                      onClick={() => handleDelete(drug._id)}
+                    >
                       <i className="fa fa-trash text-danger" aria-hidden="true"></i>
                     </button>
                   </td>
                 </tr>
               ))}
 
-            {drugs.length === 0 && loading && (
+            {drugs.length === 0 && allDrugsLoading && (
               <tr>
                 <td colSpan="18" className="text-center">
                   <div className="spinner-border text-secondary my-2 me-2" role="status">
                     <span className="visually-hidden">Loading...</span>
                   </div>
+                </td>
+              </tr>
+            )}
+
+            {drugs.length === 0 && !allDrugsLoading && (
+              <tr>
+                <td colSpan="18" className="text-center">
+                  <span className="text-danger">No Data Available</span>
                 </td>
               </tr>
             )}

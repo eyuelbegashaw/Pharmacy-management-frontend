@@ -1,10 +1,12 @@
+import {useState, useEffect} from "react";
+import {useGlobalState} from "../context/GlobalProvider";
 import {NavLink, Outlet, useNavigate} from "react-router-dom";
-import {userContext} from "../context/globalState";
-import {useState, useContext, useEffect} from "react";
+
+import {ToastContainer} from "react-toastify";
 
 const SideNav = () => {
   const navigate = useNavigate();
-  const {user, setUser} = useContext(userContext);
+  const {user, setUser} = useGlobalState();
   const [show, setShow] = useState(true);
 
   useEffect(() => {
@@ -14,7 +16,7 @@ const SideNav = () => {
     } else if (!user || user.status !== "active") {
       navigate("/login");
     }
-  }, [navigate, setUser]);
+  }, []);
 
   const logout = async () => {
     localStorage.removeItem("user");
@@ -23,6 +25,7 @@ const SideNav = () => {
 
   return (
     <>
+      <ToastContainer />
       {user && (
         <>
           <button
@@ -32,7 +35,7 @@ const SideNav = () => {
             {show ? "Hide" : "Show"}
           </button>
 
-          <div className="d-md-flex align-items-stretch">
+          <div className="d-md-flex align-items-stretch" style={{minHeight: "100vh"}}>
             {show && (
               <nav className="theme text-light p-1">
                 <div className="d-md-flex flex-column p-1 navbars">

@@ -1,14 +1,12 @@
 import {useNavigate} from "react-router-dom";
-import {useState, useEffect, useContext} from "react";
-import {userContext} from "../context/globalState";
+import {useState, useEffect} from "react";
+import {useGlobalState} from "../context/GlobalProvider";
 
 //API
 import * as transactionAPI from "../API/transactionAPI";
-import * as userAPI from "../API/authentication";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
-import {ToastContainer, toast} from "react-toastify";
+import {toast} from "react-toastify";
 
 //Util
 import {errorMessage} from "../util/error";
@@ -17,18 +15,15 @@ import {fixedTwoDigit} from "../util/twoDigit";
 
 const DailyTransaction = () => {
   const navigate = useNavigate();
-  const {user} = useContext(userContext);
-
-  const [loading, setLoading] = useState(false);
-  const [datas, setDatas] = useState([]);
-  const [users, setUsers] = useState([]);
+  const {user, users, transactions, setTransactions, loading, setLoading} = useGlobalState();
+  const {transactionsLoading} = loading;
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [dailyDate, setDailyDate] = useState("");
   const [saleBy, setSaleBy] = useState("");
-
   const [selected, setSelected] = useState("daily");
+  const [filteredTransaction, setFilteredTransaction] = useState(transactions);
 
   useEffect(() => {
     if (!user || user.status !== "active") {
@@ -37,39 +32,18 @@ const DailyTransaction = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        if (!user.isAdmin) {
-          const result = await transactionAPI.getDailyTransaction(
-            {startDate: new Date(), saleBy: user._id},
-            user.token
-          );
-          setDatas(result);
-        } else {
-          const response = await transactionAPI.getTransaction(user.token);
-          setDatas(response);
-          const result = await userAPI.getUsers(user.token);
-          setUsers(result);
-        }
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toast.error(errorMessage(error));
-      }
-    };
-    fetchData();
-  }, [user.token, user._id, user.isAdmin]);
+    setFilteredTransaction(transactions);
+  }, [transactions]);
 
   const handleSubmit = async () => {
     try {
-      setLoading(true);
+      setLoading(prevState => ({...prevState, transactionsLoading: true}));
       if (selected === "daily") {
         const result = await transactionAPI.getDailyTransaction(
           {startDate: dailyDate, saleBy},
           user.token
         );
-        setDatas(result);
+        setFilteredTransaction(result);
       } else if (selected === "range") {
         if ((startDate === "" && endDate !== "") || (startDate !== "" && endDate === "")) {
           toast.error("Both dates have to be filled or Both dates have to be empty");
@@ -78,38 +52,30 @@ const DailyTransaction = () => {
             {startDate, endDate, saleBy},
             user.token
           );
-          setDatas(result);
+          setFilteredTransaction(result);
         }
       }
-      setLoading(false);
+      setLoading(prevState => ({...prevState, transactionsLoading: false}));
     } catch (error) {
-      setLoading(false);
+      setLoading(prevState => ({...prevState, transactionsLoading: false}));
       toast.error(errorMessage(error));
     }
   };
 
-  const handleClear = async () => {
-    try {
-      setLoading(true);
-      const response = await transactionAPI.getTransaction(user.token);
-      setDatas(response);
-      setSelected("daily");
-      setDailyDate("");
-      setStartDate("");
-      setEndDate("");
-      setSaleBy("");
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      toast.error(errorMessage(error));
-    }
+  const handleClear = () => {
+    setFilteredTransaction(transactions);
+    setSelected("daily");
+    setDailyDate("");
+    setStartDate("");
+    setEndDate("");
+    setSaleBy("");
   };
 
   const handleDelete = async id => {
     if (window.confirm("Are you sure you want to delete?")) {
       try {
         await transactionAPI.deleteTransaction(id, user.token);
-        setDatas(datas.filter(value => value._id !== id));
+        setTransactions(transactions.filter(value => value._id !== id));
         toast.success("Transaction Deleted Successfully");
       } catch (error) {
         toast.error(errorMessage(error));
@@ -119,7 +85,6 @@ const DailyTransaction = () => {
 
   return (
     <div className="w-100">
-      <ToastContainer />
       <div className="w-100 text-white fs-4 text-center py-2 theme">Transaction Report</div>
       <div>
         {user.isAdmin && (
@@ -208,7 +173,7 @@ const DailyTransaction = () => {
               <div className="ms-4" onClick={() => window.print()}>
                 <button className="btn theme text-white">Print</button>
               </div>
-              {datas.length > 0 && loading && (
+              {transactions.length > 0 && transactionsLoading && (
                 <div className="spinner-border text-secondary mb-1 ms-1" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
@@ -231,49 +196,55 @@ const DailyTransaction = () => {
                 <th>Sale Price</th>
                 <th>Total price</th>
                 {user.isAdmin && <th>Profit</th>}
-                {user.isAdmin && <th>Delete</th>}
+                {user.isAdmin && <th className="deleteButton">Delete</th>}
               </tr>
             </thead>
             <tbody>
-              {datas.length !== 0 &&
-                datas.map((data, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>{ConvertDate(data.date)} </td>
-                    <td>{data.brand_name} </td>
-                    <td>{data.batch_number} </td>
-                    <td>
-                      {data.sale_by ? (
-                        data.sale_by.name
-                      ) : (
-                        <span className="text-danger">DELETED</span>
-                      )}
-                    </td>
-                    {user.isAdmin && <td>{fixedTwoDigit(data.purchased_price)}</td>}
-                    <td>{data.quantity} </td>
-                    <td>{fixedTwoDigit(data.price)} </td>
-                    <td>{fixedTwoDigit(data.total_price)} </td>
-                    {user.isAdmin && <td>{fixedTwoDigit(data.profit)} </td>}
-                    {user.isAdmin && (
-                      <td>
-                        <button className="border-0" onClick={() => handleDelete(data._id)}>
-                          <i className="fa fa-trash text-danger" aria-hidden="true"></i>
-                        </button>
-                      </td>
+              {filteredTransaction.map((transaction, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>{ConvertDate(transaction.date)} </td>
+                  <td>{transaction.brand_name} </td>
+                  <td>{transaction.batch_number} </td>
+                  <td>
+                    {transaction.sale_by ? (
+                      transaction.sale_by.name
+                    ) : (
+                      <span className="text-danger">DELETED</span>
                     )}
-                  </tr>
-                ))}
-              {datas.length !== 0 && (
+                  </td>
+                  {user.isAdmin && <td>{fixedTwoDigit(transaction.purchased_price)}</td>}
+                  <td>{transaction.quantity} </td>
+                  <td>{fixedTwoDigit(transaction.price)} </td>
+                  <td>{fixedTwoDigit(transaction.total_price)} </td>
+                  {user.isAdmin && <td>{fixedTwoDigit(transaction.profit)} </td>}
+                  {user.isAdmin && (
+                    <td>
+                      <button
+                        className="border-0 deleteButton"
+                        onClick={() => handleDelete(transaction._id)}
+                      >
+                        <i className="fa fa-trash text-danger" aria-hidden="true"></i>
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+              {filteredTransaction.length !== 0 && (
                 <tr className="bottom">
                   <th colSpan="1"></th>
                   <th colSpan={user.isAdmin ? "2" : "3"}>
-                    Gross Sold Quantity = {datas.reduce((acc, curr) => acc + curr.quantity, 0)}
+                    Gross Sold Quantity ={" "}
+                    {filteredTransaction.reduce((acc, curr) => acc + curr.quantity, 0)}
                   </th>
                   {user.isAdmin && (
                     <th colSpan="2">
                       Gross Buying Price ={" "}
                       {fixedTwoDigit(
-                        datas.reduce((acc, curr) => acc + curr.quantity * curr.purchased_price, 0)
+                        filteredTransaction.reduce(
+                          (acc, curr) => acc + curr.quantity * curr.purchased_price,
+                          0
+                        )
                       )}
                     </th>
                   )}
@@ -281,24 +252,33 @@ const DailyTransaction = () => {
                   <th colSpan={user.isAdmin ? "2" : "8"}>
                     Gross Sold Price ={" "}
                     {fixedTwoDigit(
-                      datas.reduce((acc, curr) => acc + curr.quantity * curr.price, 0)
+                      filteredTransaction.reduce((acc, curr) => acc + curr.quantity * curr.price, 0)
                     )}
                   </th>
                   {user.isAdmin && (
                     <th colSpan="4">
                       Gross Profit ={" "}
-                      {fixedTwoDigit(datas.reduce((acc, curr) => acc + curr.profit, 0))}
+                      {fixedTwoDigit(
+                        filteredTransaction.reduce((acc, curr) => acc + curr.profit, 0)
+                      )}
                     </th>
                   )}
                 </tr>
               )}
-
-              {datas.length === 0 && loading && (
+              {filteredTransaction.length === 0 && transactionsLoading && (
                 <tr>
                   <td colSpan={user.isAdmin ? "11" : "8"} className="text-center">
                     <div className="spinner-border text-secondary my-2 me-2" role="status">
                       <span className="visually-hidden">Loading...</span>
                     </div>
+                  </td>
+                </tr>
+              )}
+
+              {filteredTransaction.length === 0 && !transactionsLoading && (
+                <tr>
+                  <td colSpan={user.isAdmin ? "11" : "8"} className="text-center">
+                    <span className="text-danger">No Data Available</span>
                   </td>
                 </tr>
               )}

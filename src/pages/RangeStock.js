@@ -1,24 +1,25 @@
-import {useState, useEffect, useContext} from "react";
-import {userContext} from "../context/globalState";
+import {useState, useEffect} from "react";
+import {useGlobalState} from "../context/GlobalProvider";
 import {useNavigate} from "react-router-dom";
 
 //API
 import * as drugAPI from "../API/drugAPI";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
-import {ToastContainer, toast} from "react-toastify";
+import {toast} from "react-toastify";
 import {errorMessage} from "../util/error";
 import {fixedTwoDigit} from "../util/twoDigit";
 
+//Util
+import {ConvertDate} from "../util/date";
+
 const RangeStock = () => {
   const navigate = useNavigate();
-  const {user} = useContext(userContext);
+  const {user, allDrugs, loading, setLoading} = useGlobalState();
+  const {drugsLoading} = loading;
 
-  const [loading, setLoading] = useState(false);
-  const [drugs, setDrugs] = useState([]);
+  const [filteredStock, setFilteredStock] = useState(allDrugs);
   const [groupedDrugs, setGroupedDrugs] = useState([]);
-
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -29,25 +30,14 @@ const RangeStock = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await drugAPI.getAllDrug(user.token);
-        setDrugs(response);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toast.error(errorMessage(error));
-      }
-    };
-    fetchData();
-  }, [user.token, setDrugs]);
+    setFilteredStock(allDrugs);
+  }, [allDrugs]);
 
   useEffect(() => {
     const groupTransactionsByDate = () => {
       const dailySummaries = {};
 
-      drugs.forEach(drug => {
+      filteredStock.forEach(drug => {
         const date = ConvertDate(drug.purchased_date);
         if (!dailySummaries[date]) {
           dailySummaries[date] = {
@@ -66,50 +56,32 @@ const RangeStock = () => {
     };
 
     groupTransactionsByDate();
-  }, [drugs]);
-
-  const ConvertDate = input => {
-    let x = Date.parse(input);
-    if (!isNaN(x)) {
-      let date = new Date(input);
-      let result = new Date(date.getTime()).toISOString().substring(0, 10);
-      return result;
-    } else if (input === "") return "";
-  };
+  }, [filteredStock]);
 
   const handleSubmit = async () => {
     if (startDate === "" || endDate === "") {
       toast.error("Empty fields");
     } else {
       try {
-        setLoading(true);
+        setLoading(prevState => ({...prevState, drugsLoading: true}));
         const response = await drugAPI.getDailyStock({startDate, endDate}, user.token);
-        setDrugs(response);
-        setLoading(false);
+        setFilteredStock(response);
+        setLoading(prevState => ({...prevState, drugsLoading: false}));
       } catch (error) {
-        setLoading(false);
+        setLoading(prevState => ({...prevState, drugsLoading: false}));
         toast.error(errorMessage(error));
       }
     }
   };
 
-  const handleClear = async () => {
-    try {
-      setLoading(true);
-      const response = await drugAPI.getAllDrug(user.token);
-      setDrugs(response);
-      setStartDate("");
-      setEndDate("");
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      toast.error(errorMessage(error));
-    }
+  const handleClear = () => {
+    setFilteredStock(allDrugs);
+    setStartDate("");
+    setEndDate("");
   };
 
   return (
     <div className="w-100">
-      <ToastContainer />
       <div className="w-100 theme text-white fs-4 text-center py-2">Stock Report</div>
       <div>
         <div className="d-md-flex justify-content-around ms-2">
@@ -150,7 +122,7 @@ const RangeStock = () => {
             <div className="ms-4 align-self-end" onClick={() => window.print()}>
               <button className="btn theme text-white">Print</button>
             </div>
-            {groupedDrugs.length > 0 && loading && (
+            {groupedDrugs.length > 0 && drugsLoading && (
               <div className="spinner-border text-secondary mb-1 ms-1" role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
@@ -177,12 +149,20 @@ const RangeStock = () => {
                 </tr>
               ))}
 
-              {groupedDrugs.length === 0 && loading && (
+              {groupedDrugs.length === 0 && drugsLoading && (
                 <tr>
                   <td colSpan="4" className="text-center">
                     <div className="spinner-border text-secondary my-2 me-2" role="status">
                       <span className="visually-hidden">Loading...</span>
                     </div>
+                  </td>
+                </tr>
+              )}
+
+              {groupedDrugs.length === 0 && !drugsLoading && (
+                <tr>
+                  <td colSpan="4" className="text-center">
+                    <span className="text-danger">No Data Available</span>
                   </td>
                 </tr>
               )}

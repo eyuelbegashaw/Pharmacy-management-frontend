@@ -1,5 +1,6 @@
-import {userContext} from "../context/globalState";
-import {useState, useEffect, useContext} from "react";
+import {useState, useEffect} from "react";
+import {useNavigate} from "react-router-dom";
+import {useGlobalState} from "../context/GlobalProvider";
 
 //Profile component
 import ProfileForm from "../components/Profile/ProfileForm";
@@ -8,15 +9,14 @@ import ProfileForm from "../components/Profile/ProfileForm";
 import * as profileAPI from "../API/profileAPI";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
-import {ToastContainer, toast} from "react-toastify";
-import {useNavigate} from "react-router-dom";
+import {toast} from "react-toastify";
 
+//Util
 import {errorMessage} from "../util/error";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const {user} = useContext(userContext);
+  const {user} = useGlobalState();
   const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({
     name: "",
@@ -71,7 +71,6 @@ const Profile = () => {
 
   return (
     <div className="container-fluid mt-1">
-      <ToastContainer />
       <div>
         <ProfileForm
           handleSubmit={handleSubmit}

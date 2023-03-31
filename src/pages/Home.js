@@ -1,30 +1,41 @@
+import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {userContext} from "../context/globalState";
-import {useEffect, useState, useContext} from "react";
+import {useGlobalState} from "../context/GlobalProvider";
 
 //Home components
-import Receipt from "./Receipt";
+import Receipt from "../components/Home/Receipt";
 import HomeForm from "../components/Home/HomeForm";
 import HomeTable from "../components/Home/HomeTable";
 import Notification from "../components/Home/Notification";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
-import {ToastContainer, toast} from "react-toastify";
+import {toast} from "react-toastify";
 
+//Utils
 import {errorMessage} from "../util/error";
 import {fixedTwoDigit} from "../util/twoDigit";
+import socket from "../util/socket";
 
 //APIs
-import * as drugAPI from "../API/drugAPI";
-import * as categoryAPI from "../API/categoryAPI";
 import * as transactionAPI from "../API/transactionAPI";
-import * as NotificationAPI from "../API/notificationAPI";
 
-const Home = ({socket}) => {
+const Home = () => {
   const navigate = useNavigate();
 
-  const {user} = useContext(userContext);
+  const {
+    user,
+    drugs,
+    setDrugs,
+    categories,
+    notifications,
+    setNotifications,
+    setTransactions,
+    loading,
+    setLoading,
+  } = useGlobalState();
+
+  const {drugsLoading} = loading;
+
   const [inputs, setInputs] = useState({
     _id: "",
     brand_name: "",
@@ -44,80 +55,43 @@ const Home = ({socket}) => {
     measurement_size: "",
   });
 
-  const [filterName, setFilterName] = useState("brand_name");
+  const [print, setPrint] = useState(false);
   const [category, setCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRow, setSelectedRow] = useState("");
-  const [print, setPrint] = useState(false);
-
-  const [drugs, setDrugs] = useState([]);
-  const [fetchedDrugs, setFetchedDrugs] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [transaction, setTransaction] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-
-  const [loading, setLoading] = useState(false);
+  const [filteredDrugs, setFilteredDrugs] = useState([]);
+  const [filterName, setFilterName] = useState("brand_name");
 
   useEffect(() => {
     if (!user || user.status !== "active") {
       navigate("/login");
     }
-  }, [user, navigate]);
+  }, [user]);
+
+  useEffect(() => {
+    setFilteredDrugs(drugs);
+  }, [drugs]);
 
   useEffect(() => {
     socket.on("drugUpdate", data => {
-      console.log("data", data);
-      console.log("calling socket");
       setDrugs(data);
-      console.log("getting socket");
     });
   }, [socket]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        console.log("calling drugs");
-        const drugs = await drugAPI.getDrug(user.token);
-        console.log("getting drugs");
-        setDrugs(drugs);
-        setFetchedDrugs(drugs);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toast.error(errorMessage(error));
-      }
-    };
-    fetchData();
-  }, [user.token]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const categories = await categoryAPI.getCategory(user.token);
-        setCategories(categories);
-        const response = await NotificationAPI.getNotification(user.token);
-        setNotifications(response);
-      } catch (error) {
-        toast.error(errorMessage(error));
-      }
-    };
-    fetchData();
-  }, [drugs, user.token]);
-
-  useEffect(() => {
     const handleSearch = () => {
-      let filteredData = fetchedDrugs;
+      let filteredData = drugs;
       if (searchTerm.trim() !== "") {
         if (category !== "all") {
           if (filterName === "generic_name") {
-            filteredData = filteredData.filter(
+            filteredData = drugs.filter(
               item =>
                 item.generic_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
                 (category === "" || item.category_id.name === category)
             );
           } else {
-            filteredData = filteredData.filter(
+            filteredData = drugs.filter(
               item =>
                 item.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
                 (category === "" || item.category_id.name === category)
@@ -125,25 +99,23 @@ const Home = ({socket}) => {
           }
         } else if (category === "all") {
           if (filterName === "generic_name") {
-            filteredData = fetchedDrugs.filter(item => {
+            filteredData = drugs.filter(item => {
               return item.generic_name.toLowerCase().includes(searchTerm.toLowerCase());
             });
           } else {
-            filteredData = fetchedDrugs.filter(item => {
+            filteredData = drugs.filter(item => {
               return item.brand_name.toLowerCase().includes(searchTerm.toLowerCase());
             });
           }
         }
       } else if (category !== "" && category !== "all") {
-        filteredData = filteredData.filter(
-          item => item.category_id && item.category_id.name === category
-        );
+        filteredData = drugs.filter(item => item.category_id && item.category_id.name === category);
       }
-      setDrugs(filteredData);
+      setFilteredDrugs(filteredData);
     };
 
     handleSearch();
-  }, [searchTerm, category, fetchedDrugs, filterName]);
+  }, [searchTerm, category, filteredDrugs, filterName]);
 
   const handleChange = e => {
     const name = e.target.name;
@@ -226,15 +198,24 @@ const Home = ({socket}) => {
     if (transaction.length !== 0) {
       try {
         if (transaction.length !== 0) {
-          setLoading(true);
+          setLoading(prevState => ({...prevState, drugsLoading: true}));
           await transactionAPI.createTransaction(transaction, user.token);
           toast.success("Transaction added successfully");
-          const drugs = await drugAPI.getDrug(user.token);
-          setDrugs(drugs);
-          setFetchedDrugs(drugs);
-          setLoading(false);
+          setLoading(prevState => ({...prevState, drugsLoading: false}));
+        }
+
+        if (!user.isAdmin) {
+          const response = await transactionAPI.getDailyTransaction(
+            {startDate: new Date(), saleBy: user._id},
+            user.token
+          );
+          setTransactions(response);
+        } else {
+          const response = await transactionAPI.getTransaction(user.token);
+          setTransactions(response);
         }
       } catch (error) {
+        setLoading(prevState => ({...prevState, drugsLoading: false}));
         toast.error(errorMessage(error));
       }
     } else {
@@ -258,7 +239,6 @@ const Home = ({socket}) => {
     <>
       {!print && (
         <div className="w-100">
-          <ToastContainer />
           <div className="w-100 text-white fs-4 text-center py-1  mb-2 theme d-flex justify-content-around ">
             <div>BENET PHARMACY</div>
             <Notification notifications={notifications} setNotifications={setNotifications} />
@@ -307,10 +287,10 @@ const Home = ({socket}) => {
 
                 <div>
                   <HomeTable
-                    datas={drugs}
+                    drugs={filteredDrugs}
                     handleEdit={handleEdit}
                     selectedRow={selectedRow}
-                    loading={loading}
+                    drugsLoading={drugsLoading}
                   />
                 </div>
               </div>
@@ -365,7 +345,7 @@ const Home = ({socket}) => {
                     </button>
                   </div>
                   <div className="d-flex">
-                    {transaction.length !== 0 && loading && (
+                    {transaction.length !== 0 && drugsLoading && (
                       <div className="spinner-border text-secondary my-2 me-2" role="status">
                         <span className="visually-hidden">Loading...</span>
                       </div>

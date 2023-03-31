@@ -178,6 +178,10 @@ body {
     height: auto;
     overflow: visible;
   }
+
+  .deleteButton {
+    display: none;
+  }
 }
 
 @media only screen and (max-width: 768px) {

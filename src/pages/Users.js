@@ -1,5 +1,5 @@
-import {userContext} from "../context/globalState";
-import {useState, useEffect, useContext} from "react";
+import {useGlobalState} from "../context/GlobalProvider";
+import {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 
 //user Components
@@ -10,15 +10,17 @@ import UserTable from "../components/users/UserTable";
 import * as userAPI from "../API/authentication";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
-import {ToastContainer, toast} from "react-toastify";
+import {toast} from "react-toastify";
+
+//Util
 import {errorMessage} from "../util/error";
 
 const Users = () => {
   const navigate = useNavigate();
 
-  const {user} = useContext(userContext);
-  const [loading, setLoading] = useState(false);
+  const {user, users, setUsers, loading, setLoading} = useGlobalState();
+  const {usersLoading} = loading;
+
   const [inputs, setInputs] = useState({
     isAdmin: "false",
     name: "",
@@ -29,7 +31,6 @@ const Users = () => {
     password: "",
   });
 
-  const [users, setUsers] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [edit, setEdit] = useState(false);
 
@@ -38,21 +39,6 @@ const Users = () => {
       navigate("/login");
     }
   }, [user, navigate]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await userAPI.getUsers(user.token);
-        setUsers(response);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toast.error(errorMessage(error));
-      }
-    };
-    fetchData();
-  }, [user.token]);
 
   const cleanForm = () => {
     setInputs({
@@ -79,7 +65,7 @@ const Users = () => {
       toast.error("Please make sure all fields are filled in correctly");
     } else {
       try {
-        setLoading(true);
+        setLoading(prevState => ({...prevState, usersLoading: true}));
         if (edit) {
           const updated = await userAPI.updateUser(inputs, user.token);
           setUsers(users.map(value => (value._id === updated._id ? updated : value)));
@@ -92,9 +78,9 @@ const Users = () => {
           toast.success("Registerd successfully");
           cleanForm();
         }
-        setLoading(false);
+        setLoading(prevState => ({...prevState, usersLoading: false}));
       } catch (error) {
-        setLoading(false);
+        setLoading(prevState => ({...prevState, usersLoading: false}));
         toast.error(errorMessage(error));
       }
     }
@@ -135,7 +121,6 @@ const Users = () => {
   return (
     <div className="w-100">
       <div className="w-100 theme text-white fs-4 text-center py-2 mb-2">Staff Management</div>
-      <ToastContainer />
       <div className="m-2">
         <div>
           <button onClick={handleAddClick} className="btn theme text-white mb-2">
@@ -148,18 +133,18 @@ const Users = () => {
             handleChange={handleChange}
             inputs={inputs}
             edit={edit}
-            users={users}
-            loading={loading}
+            usersLength={users.length}
+            usersLoading={usersLoading}
           />
         )}
       </div>
 
       <div className="m-2">
         <UserTable
-          datas={users}
+          users={users}
           handleDelete={handleDelete}
           handleEdit={handleEdit}
-          loading={loading}
+          usersLoading={usersLoading}
         />
       </div>
     </div>

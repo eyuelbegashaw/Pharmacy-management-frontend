@@ -1,13 +1,12 @@
 import {useNavigate} from "react-router-dom";
-import {userContext} from "../context/globalState";
-import {useState, useEffect, useContext} from "react";
+import {useGlobalState} from "../context/GlobalProvider";
+import {useState, useEffect} from "react";
 
 //APIs
 import * as drugAPI from "../API/drugAPI";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
-import {ToastContainer, toast} from "react-toastify";
+import {toast} from "react-toastify";
 
 //Util
 import {errorMessage} from "../util/error";
@@ -15,26 +14,12 @@ import {ConvertDate} from "../util/date";
 
 const FollowUp = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const {user, expiredDrugs, loading, setLoading} = useGlobalState();
+  const {expiredDrugsLoading} = loading;
+
   const [select, handleSelect] = useState("expired");
   const [days, setDays] = useState(0);
-  const [drugs, setDrugs] = useState([]);
-  const {user} = useContext(userContext);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const reponse = await drugAPI.getExpiredDrug(user.token);
-        setLoading(false);
-        setDrugs(reponse);
-      } catch (error) {
-        setLoading(false);
-        toast.error(errorMessage(error));
-      }
-    };
-    fetchData();
-  }, [user.token]);
+  const [filteredDrugs, setFilteredDrugs] = useState(expiredDrugs);
 
   useEffect(() => {
     if (!user || user.status !== "active") {
@@ -42,27 +27,30 @@ const FollowUp = () => {
     }
   }, [user, navigate]);
 
+  useEffect(() => {
+    setFilteredDrugs(expiredDrugs);
+  }, [expiredDrugs]);
+
   const handleShow = async () => {
     try {
       if (Number(days) < 0 || !Number.isInteger(Number(days))) {
         toast.error("Please make sure all fields are filled in correctly");
       } else {
-        setLoading(true);
+        setLoading(prevState => ({...prevState, expiredDrugsLoading: true}));
         if (select === "expired") {
-          const expired = await drugAPI.getExpiredDrug(user.token);
-          setDrugs(expired);
+          setFilteredDrugs(expiredDrugs);
         } else if (select === "expiringSoon") {
           const expiringSoon = await drugAPI.getExpiringSoonDrugs({days}, user.token);
-          setDrugs(expiringSoon);
+          setFilteredDrugs(expiringSoon);
         } else if (select === "outOfStock") {
           const lowStockDrugs = await drugAPI.getLowStockDrug({quantity: days}, user.token);
-          setDrugs(lowStockDrugs);
+          setFilteredDrugs(lowStockDrugs);
         }
       }
 
-      setLoading(false);
+      setLoading(prevState => ({...prevState, expiredDrugsLoading: false}));
     } catch (error) {
-      setLoading(false);
+      setLoading(prevState => ({...prevState, expiredDrugsLoading: false}));
       toast.error(errorMessage(error));
     }
   };
@@ -72,7 +60,6 @@ const FollowUp = () => {
       <div className="w-100 theme text-white fs-4 text-center py-2 mb-2">
         Expired and Low Stock Drugs
       </div>
-      <ToastContainer />
 
       <div className="d-sm-flex justify-content-around align-items-center ms-2">
         <div className="mb-3">
@@ -123,7 +110,7 @@ const FollowUp = () => {
                 Show
               </button>
             </div>
-            {drugs.length > 0 && loading && (
+            {filteredDrugs.length > 0 && expiredDrugsLoading && (
               <div className="spinner-border text-secondary ms-2" role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
@@ -147,7 +134,7 @@ const FollowUp = () => {
             </tr>
           </thead>
           <tbody>
-            {drugs.map((drug, index) => (
+            {filteredDrugs.map((drug, index) => (
               <tr key={index}>
                 <td>{drug.brand_name} </td>
                 <td>{drug.batch_number} </td>
@@ -161,12 +148,20 @@ const FollowUp = () => {
               </tr>
             ))}
 
-            {drugs.length === 0 && loading && (
+            {expiredDrugs.length === 0 && expiredDrugsLoading && (
               <tr>
                 <td colSpan="8" className="text-center">
                   <div className="spinner-border text-secondary my-2 me-2" role="status">
                     <span className="visually-hidden">Loading...</span>
                   </div>
+                </td>
+              </tr>
+            )}
+
+            {expiredDrugs.length == 0 && !expiredDrugsLoading && (
+              <tr>
+                <td colSpan="8" className="text-center">
+                  <span className="text-danger">No data Available</span>
                 </td>
               </tr>
             )}

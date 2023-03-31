@@ -1,4 +1,4 @@
-const UserForm = ({handleSubmit, handleChange, inputs, edit, users, loading}) => {
+const UserForm = ({handleSubmit, handleChange, inputs, edit, usersLength, usersLoading}) => {
   return (
     <form onSubmit={e => handleSubmit(e)}>
       <div className="container">
@@ -106,7 +106,7 @@ const UserForm = ({handleSubmit, handleChange, inputs, edit, users, loading}) =>
             className="btn theme text-white"
           />
         </div>
-        {users.length > 0 && loading && (
+        {usersLength > 0 && usersLoading && (
           <div className="spinner-border text-secondary mt-1 ms-2" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>

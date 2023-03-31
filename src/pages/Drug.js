@@ -1,26 +1,35 @@
 import {useNavigate} from "react-router-dom";
-import {userContext} from "../context/globalState";
-import {useState, useEffect, useContext} from "react";
+import {useGlobalState} from "../context/GlobalProvider";
+import {useState, useEffect} from "react";
 
 //Drug Components
 import DrugForm from "../components/drug/DrugForm";
 import DrugTable from "../components/drug/DrugTable";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
-import {ToastContainer, toast} from "react-toastify";
+import {toast} from "react-toastify";
 
 //Util
 import {errorMessage} from "../util/error";
 
 //APIs
 import * as drugAPI from "../API/drugAPI";
-import * as categoryAPI from "../API/categoryAPI";
-import * as supplierAPI from "../API/supplierAPI";
 
 const Drug = () => {
   const navigate = useNavigate();
-  const {user} = useContext(userContext);
+  const {
+    user,
+    setDrugs,
+    allDrugs,
+    setAllDrugs,
+    categories,
+    suppliers,
+    loading,
+    setLoading,
+    setExpiredDrugs,
+  } = useGlobalState();
+  const {allDrugsLoading} = loading;
+
   const [inputs, setInputs] = useState({
     brand_name: "",
     generic_name: "",
@@ -41,59 +50,37 @@ const Drug = () => {
     lowStock: 0,
   });
 
-  const [filterName, setFilterName] = useState("brand_name");
+  const [edit, setEdit] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
   const [category, setCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-
-  const [loading, setLoading] = useState(false);
+  const [filterName, setFilterName] = useState("brand_name");
   const [selectedRow, setSelectedRow] = useState("");
-  const [categories, setCategories] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [drugs, setDrugs] = useState([]);
-  const [fetchedDrugs, setFetcheDrugs] = useState([]);
-  const [showAdd, setShowAdd] = useState(false);
-  const [edit, setEdit] = useState(false);
+  const [filteredAllDrugs, setFilteredAllDrugs] = useState(allDrugs);
 
   useEffect(() => {
     if (!user || user.status !== "active") {
       navigate("/login");
     }
-  }, [user, navigate]);
+  }, [user]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await drugAPI.getAllDrug(user.token);
-        setDrugs(response);
-        setFetcheDrugs(response);
-
-        const categories = await categoryAPI.getCategory(user.token);
-        setCategories(categories);
-        const suppliers = await supplierAPI.getSupplier(user.token);
-        setSuppliers(suppliers);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toast.error(errorMessage(error));
-      }
-    };
-    fetchData();
-  }, [user.token]);
+    setFilteredAllDrugs(allDrugs);
+  }, [JSON.stringify(allDrugs)]);
 
   useEffect(() => {
     const handleSearch = () => {
-      let filteredData = fetchedDrugs;
+      let filteredData = allDrugs;
       if (searchTerm.trim() !== "") {
         if (category !== "all") {
           if (filterName === "generic_name") {
-            filteredData = filteredData.filter(
+            filteredData = allDrugs.filter(
               item =>
                 item.generic_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
                 (category === "" || item.category_id.name === category)
             );
           } else {
-            filteredData = filteredData.filter(
+            filteredData = allDrugs.filter(
               item =>
                 item.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
                 (category === "" || item.category_id.name === category)
@@ -101,25 +88,25 @@ const Drug = () => {
           }
         } else if (category === "all") {
           if (filterName === "generic_name") {
-            filteredData = fetchedDrugs.filter(item => {
+            filteredData = allDrugs.filter(item => {
               return item.generic_name.toLowerCase().includes(searchTerm.toLowerCase());
             });
           } else {
-            filteredData = fetchedDrugs.filter(item => {
+            filteredData = allDrugs.filter(item => {
               return item.brand_name.toLowerCase().includes(searchTerm.toLowerCase());
             });
           }
         }
       } else if (category !== "" && category !== "all") {
-        filteredData = filteredData.filter(
+        filteredData = allDrugs.filter(
           item => item.category_id && item.category_id.name === category
         );
       }
-      setDrugs(filteredData);
+      setFilteredAllDrugs(filteredData);
     };
 
     handleSearch();
-  }, [searchTerm, category, fetchedDrugs, filterName]);
+  }, [searchTerm, category, filterName]);
 
   const cleanForm = () => {
     setInputs({
@@ -177,10 +164,10 @@ const Drug = () => {
       toast.error("Please make sure all fields are filled in correctly");
     } else {
       try {
-        setLoading(true);
+        setLoading(prevState => ({...prevState, allDrugsLoading: true}));
         if (edit) {
           const updated = await drugAPI.updateDrug(inputs, user.token);
-          setDrugs(drugs.map(value => (value._id === updated._id ? updated : value)));
+          setAllDrugs(allDrugs.map(value => (value._id === updated._id ? updated : value)));
           toast.success("Drug Edited successfully");
           setSelectedRow("");
           cleanForm();
@@ -190,14 +177,20 @@ const Drug = () => {
             toast.error("Quantity in Stock and Purchased quantity must be equal");
           } else {
             const newData = await drugAPI.createDrug(inputs, user.token);
-            setDrugs([...drugs, newData]);
+            setAllDrugs([...allDrugs, newData]);
             toast.success("New Drug added successfully");
             cleanForm();
           }
         }
-        setLoading(false);
+        setLoading(prevState => ({...prevState, allDrugsLoading: false}));
+
+        const Drugs = await drugAPI.getDrug(user.token);
+        setDrugs(Drugs);
+
+        const ExpiredDrugs = await drugAPI.getExpiredDrug(user.token);
+        setExpiredDrugs(ExpiredDrugs);
       } catch (error) {
-        setLoading(false);
+        setLoading(prevState => ({...prevState, allDrugsLoading: false}));
         toast.error(errorMessage(error));
       }
     }
@@ -211,24 +204,29 @@ const Drug = () => {
       } else if (Number(inputs.quantity) !== Number(inputs.purchased_quantity)) {
         toast.error("Quantity In Stock and Purchased Quantity Must Be Equal");
       } else {
-        setLoading(true);
+        setLoading(prevState => ({...prevState, allDrugsLoading: true}));
         let newDrug = {...inputs};
         delete newDrug._id;
         const newData = await drugAPI.createDrug(newDrug, user.token);
-        setDrugs([...drugs, newData]);
+        setAllDrugs([...allDrugs, newData]);
         toast.success("New Drug added successfully");
         cleanForm();
-        setLoading(false);
+        setLoading(prevState => ({...prevState, allDrugsLoading: false}));
+
+        const Drugs = await drugAPI.getDrug(user.token);
+        setDrugs(Drugs);
+
+        const ExpiredDrugs = await drugAPI.getExpiredDrug(user.token);
+        setExpiredDrugs(ExpiredDrugs);
       }
     } catch (error) {
-      setLoading(false);
+      setLoading(prevState => ({...prevState, allDrugsLoading: false}));
       toast.error(errorMessage(error));
     }
   };
 
   const handleChange = e => {
     const name = e.target.name;
-
     if (name === "purchased_quantity" && !user.isAdmin) {
       setInputs({...inputs, quantity: e.target.value, purchased_quantity: e.target.value});
     } else {
@@ -240,8 +238,14 @@ const Drug = () => {
     if (window.confirm("Are you sure you want to delete?")) {
       try {
         await drugAPI.deleteDrug(id, user.token);
-        setDrugs(drugs.filter(value => value._id !== id));
+        setAllDrugs(allDrugs.filter(value => value._id !== id));
         toast.success("Drug Deleted Successfully");
+
+        const Drugs = await drugAPI.getDrug(user.token);
+        setDrugs(Drugs);
+
+        const ExpiredDrugs = await drugAPI.getExpiredDrug(user.token);
+        setExpiredDrugs(ExpiredDrugs);
       } catch (error) {
         toast.error(errorMessage(error));
       }
@@ -252,7 +256,7 @@ const Drug = () => {
     setSelectedRow(id);
     setEdit(true);
     setShowAdd(true);
-    let target = drugs.find(value => value._id === id);
+    let target = allDrugs.find(value => value._id === id);
 
     let obj = {
       ...target,
@@ -274,7 +278,6 @@ const Drug = () => {
   return (
     <>
       <div className="horizontalTable">
-        <ToastContainer />
         <div className="text-white fs-4 text-center py-2 mb-2  theme">Drug Management</div>
         <div>
           <div className="d-flex">
@@ -296,8 +299,7 @@ const Drug = () => {
               inputs={inputs}
               edit={edit}
               user={user}
-              drugs={drugs}
-              loading={loading}
+              allDrugsLoading={allDrugsLoading}
             />
           )}
         </div>
@@ -343,11 +345,11 @@ const Drug = () => {
 
         <div>
           <DrugTable
-            drugs={drugs}
+            drugs={filteredAllDrugs}
             handleDelete={handleDelete}
             handleEdit={handleEdit}
             selectedRow={selectedRow}
-            loading={loading}
+            allDrugsLoading={allDrugsLoading}
           />
         </div>
       </div>

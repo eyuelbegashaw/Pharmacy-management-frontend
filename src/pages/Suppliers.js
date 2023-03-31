@@ -1,6 +1,6 @@
-import {userContext} from "../context/globalState";
-import {useState, useEffect, useContext} from "react";
+import {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
+import {useGlobalState} from "../context/GlobalProvider";
 
 //Supplier componenents
 import SupplierForm from "../components/supplier/SupplierForm";
@@ -10,14 +10,16 @@ import SupplierTable from "../components/supplier/SupplierTable";
 import * as supplierAPI from "../API/supplierAPI";
 
 //Toast component
-import "react-toastify/dist/ReactToastify.css";
-import {ToastContainer, toast} from "react-toastify";
+import {toast} from "react-toastify";
 
+//Utils
 import {errorMessage} from "../util/error";
 
 const Supplier = () => {
   const navigate = useNavigate();
-  const {user} = useContext(userContext);
+  const {user, suppliers, setSuppliers, loading, setLoading} = useGlobalState();
+  const {suppliersLoading} = loading;
+
   const [image, setImage] = useState("");
   const [inputs, setInputs] = useState({
     _id: "",
@@ -25,31 +27,14 @@ const Supplier = () => {
     phone_number: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [datas, setDatas] = useState([]);
-  const [showAdd, setShowAdd] = useState(false);
   const [edit, setEdit] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
 
   useEffect(() => {
     if (!user || user.status !== "active" || user.isAdmin !== true) {
       navigate("/login");
     }
   }, [user, navigate]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await supplierAPI.getSupplier(user.token);
-        setDatas(response);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toast.error(errorMessage(error));
-      }
-    };
-    fetchData();
-  }, [user.token]);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -61,19 +46,19 @@ const Supplier = () => {
       toast.error("Please make sure all fields are filled in correctly");
     } else {
       try {
-        setLoading(true);
+        setLoading(prevState => ({...prevState, suppliersLoading: true}));
         if (edit) {
           const updated = await supplierAPI.updateSupplier(inputs._id, formData, user.token);
-          setDatas(datas.map(value => (value._id === inputs._id ? updated : value)));
+          setSuppliers(suppliers.map(value => (value._id === inputs._id ? updated : value)));
           toast.success("Edited successfully");
         } else {
           const newData = await supplierAPI.createSupplier(formData, user.token);
-          setDatas([...datas, newData]);
+          setSuppliers([...suppliers, newData]);
           toast.success("New data added successfully");
         }
-        setLoading(false);
+        setLoading(prevState => ({...prevState, suppliersLoading: false}));
       } catch (error) {
-        setLoading(false);
+        setLoading(prevState => ({...prevState, suppliersLoading: false}));
         toast.error(errorMessage(error));
       }
     }
@@ -92,7 +77,7 @@ const Supplier = () => {
     if (window.confirm("Are you sure you want to delete?")) {
       try {
         await supplierAPI.deleteSupplier(id, user.token);
-        setDatas(datas.filter(data => data._id !== id));
+        setSuppliers(suppliers.filter(data => data._id !== id));
         toast.success("Deleted successfully");
       } catch (error) {
         toast.error(errorMessage(error));
@@ -103,7 +88,7 @@ const Supplier = () => {
   const handleEdit = id => {
     setEdit(true);
     setShowAdd(true);
-    let target = datas.find(value => value._id === id);
+    let target = suppliers.find(value => value._id === id);
     setInputs(target);
   };
 
@@ -123,7 +108,6 @@ const Supplier = () => {
   return (
     <div className="w-100">
       <div className="w-100 theme text-white fs-4 text-center py-2 mb-2">Supplier Management</div>
-      <ToastContainer />
       <div className="m-2">
         <div>
           <button onClick={handleAddClick} className="btn theme text-white mb-2">
@@ -136,18 +120,18 @@ const Supplier = () => {
             handleChange={handleChange}
             inputs={inputs}
             edit={edit}
-            suppliers={datas}
-            loading={loading}
+            suppliersLength={suppliers.length}
+            suppliersLoading={suppliersLoading}
           />
         )}
       </div>
 
       <div className="2">
         <SupplierTable
-          datas={datas}
+          suppliers={suppliers}
           handleDelete={handleDelete}
           handleEdit={handleEdit}
-          loading={loading}
+          suppliersLoading={suppliersLoading}
         />
       </div>
     </div>
