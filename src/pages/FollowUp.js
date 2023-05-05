@@ -148,7 +148,7 @@ const FollowUp = () => {
               </tr>
             ))}
 
-            {expiredDrugs.length === 0 && expiredDrugsLoading && (
+            {filteredDrugs.length === 0 && expiredDrugsLoading && (
               <tr>
                 <td colSpan="8" className="text-center">
                   <div className="spinner-border text-secondary my-2 me-2" role="status">
@@ -158,7 +158,7 @@ const FollowUp = () => {
               </tr>
             )}
 
-            {expiredDrugs.length == 0 && !expiredDrugsLoading && (
+            {filteredDrugs.length == 0 && !expiredDrugsLoading && (
               <tr>
                 <td colSpan="8" className="text-center">
                   <span className="text-danger">No data Available</span>
